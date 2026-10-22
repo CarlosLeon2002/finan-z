@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es-419">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#4a51c8" />
+    <meta
+      name="description"
+      content="App personal (PWA) para repartir tus ingresos, planear metas de ahorro y leer consejos financieros. Tus datos se quedan en tu dispositivo."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <title>Finan-Z</title>
+    <!-- Aplica tema y acento guardados antes del primer pintado (sin parpadeo). -->
+    <script>
+      ;(function () {
+        try {
+          var raw = localStorage.getItem('finanzas-personales::state')
+          var record = raw ? JSON.parse(raw) : null
+          var settings = (record && record.data && record.data.settings) || {}
+          var mode = settings.themeMode || 'auto'
+          var dark =
+            mode === 'dark' ||
+            (mode !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          var root = document.documentElement
+          root.setAttribute('data-theme', dark ? 'dark' : 'light')
+          if (settings.accent) root.setAttribute('data-accent', settings.accent)
+          root.style.colorScheme = dark ? 'dark' : 'light'
+          var meta = document.querySelector('meta[name="theme-color"]')
+          if (meta) meta.setAttribute('content', dark ? '#0a0d16' : '#4a51c8')
+        } catch (error) {
+          /* Estado ilegible: se usa el tema por defecto. */
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
