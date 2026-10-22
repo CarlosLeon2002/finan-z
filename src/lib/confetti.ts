@@ -26,7 +26,7 @@ export function celebrateGoal(): void {
   const shared = {
     colors: themeColors(),
     disableForReducedMotion: true,
-    ticks: 190,
+    ticks: 160,
     gravity: 0.95,
     scalar: 0.95,
     zIndex: 90,
@@ -37,7 +37,7 @@ export function celebrateGoal(): void {
     particleCount: 80,
     spread: 72,
     startVelocity: 44,
-    origin: { x: 0.5, y: 0.58 },
+    origin: { x: 0.5, y: 0.62 },
     shapes: ['circle', 'square'],
   })
 
@@ -48,7 +48,7 @@ export function celebrateGoal(): void {
       angle: 62,
       spread: 58,
       startVelocity: 38,
-      origin: { x: 0.04, y: 0.72 },
+      origin: { x: 0.06, y: 0.76 },
     })
     confetti({
       ...shared,
@@ -56,7 +56,10 @@ export function celebrateGoal(): void {
       angle: 118,
       spread: 58,
       startVelocity: 38,
-      origin: { x: 0.96, y: 0.72 },
+      origin: { x: 0.94, y: 0.76 },
     })
   }, 170)
+  // La celebración dura lo que un respiro: el canvas se retira solo.
+  const cleanup = confetti as unknown as { reset?: () => void }
+  window.setTimeout(() => cleanup.reset?.(), 1600)
 }
