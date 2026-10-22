@@ -1,16 +1,25 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useI18n } from '../../app/i18n'
 import { useAppState } from '../../app/state'
 import { CURRENCY_CODES, type AccentId, type ChartStyle, type CurrencyCode, type ThemeMode } from '../../types'
 import { ACCENT_OPTIONS } from '../../theme/accents'
 import { getStateSize } from '../../storage/localStore'
+import {
+  BackupError,
+  MAX_BACKUP_BYTES,
+  parseBackupText,
+  type BackupErrorCode,
+  type BackupPreview,
+} from '../backup/backupFormat'
 import { downloadExport } from '../export/exportText'
+import { APP_VERSION } from '../../lib/appVersion'
 import { cn } from '../../lib/cn'
 import type { TranslationKey } from '../../i18n/types'
 import { Button } from '../../components/ui/Button'
 import { Card, SectionHeader } from '../../components/ui/Card'
 import { Field, Select } from '../../components/ui/Field'
 import {
+  AlertTriangleIcon,
   BarChartIcon,
   CheckIcon,
   DeviceIcon,
@@ -19,14 +28,28 @@ import {
   LayersIcon,
   MoonIcon,
   PieChartIcon,
+  RotateIcon,
   ShieldIcon,
   SlidersIcon,
+  SparklesIcon,
   SunIcon,
+  UploadIcon,
 } from '../../components/ui/Icon'
 import { Modal } from '../../components/ui/Modal'
 import { SegmentedControl } from '../../components/ui/SegmentedControl'
 
-const APP_VERSION = '1.0.0'
+type ImportViewError = BackupErrorCode | 'read'
+
+const IMPORT_ERROR_KEY: Record<ImportViewError, TranslationKey> = {
+  empty: 'settings.importErrorEmpty',
+  tooLarge: 'settings.importErrorTooLarge',
+  notBackup: 'settings.importErrorNotBackup',
+  unsupported: 'settings.importErrorUnsupported',
+  checksum: 'settings.importErrorChecksum',
+  corrupt: 'settings.importErrorCorrupt',
+  schema: 'settings.importErrorSchema',
+  read: 'settings.importErrorRead',
+}
 
 /** Nombre traducido de cada preset de acento. */
 const ACCENT_LABEL: Record<AccentId, TranslationKey> = {
@@ -199,14 +222,39 @@ function useInstallPrompt(): [InstallPromptEvent | null, () => void] {
 }
 
 /** Preferencias (idioma/moneda), datos locales, exportación e instalación. */
+interface ImportSummary {
+  categories: number
+  goals: number
+  months: number
+}
+
 export function SettingsPage() {
-  const { state, savedAt, setLocale, setCurrency, setAccent, setThemeMode, setChartStyle, resetData } =
-    useAppState()
+  const {
+    state,
+    savedAt,
+    setLocale,
+    setCurrency,
+    setAccent,
+    setThemeMode,
+    setChartStyle,
+    resetData,
+    replaceState,
+    replayOnboarding,
+  } = useAppState()
   const i18n = useI18n()
-  const { t, locale, currency, currencyName, formatDateTime } = i18n
+  const { t, locale, currency, currencyName, formatDateTime, formatMoney } = i18n
 
   const [confirmReset, setConfirmReset] = useState(false)
   const [promptEvent, install] = useInstallPrompt()
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [reading, setReading] = useState(false)
+  const [preview, setPreview] = useState<BackupPreview | null>(null)
+  const [importFileName, setImportFileName] = useState('')
+  const [importError, setImportError] = useState<ImportViewError | null>(null)
+  const [importSuccess, setImportSuccess] = useState<ImportSummary | null>(null)
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState(false)
 
   const sizeBytes = getStateSize(state)
   const sizeText =
@@ -214,7 +262,59 @@ export function SettingsPage() {
       ? `${sizeBytes} B`
       : `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(sizeBytes / 1024)} KB`
 
-  const handleExport = () => downloadExport(state, i18n)
+  const handleExport = async () => {
+    setExporting(true)
+    setExportError(false)
+    try {
+      await downloadExport(state, i18n)
+    } catch (error) {
+      console.warn('No se pudo generar el respaldo', error)
+      setExportError(true)
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget
+    const file = input.files?.[0]
+    input.value = ''
+    if (!file) return
+
+    setImportSuccess(null)
+    setImportError(null)
+    setPreview(null)
+    setImportFileName(file.name)
+
+    if (file.size > MAX_BACKUP_BYTES) {
+      setImportError('tooLarge')
+      return
+    }
+
+    setReading(true)
+    try {
+      const text = await file.text()
+      const parsed = await parseBackupText(text)
+      setPreview(parsed)
+    } catch (error) {
+      setImportError(error instanceof BackupError ? error.code : 'read')
+    } finally {
+      setReading(false)
+    }
+  }
+
+  const confirmImport = () => {
+    if (!preview) return
+    const summary: ImportSummary = {
+      categories: preview.state.categories.length,
+      goals: preview.state.goals.length,
+      months: preview.state.budgets.length,
+    }
+    replaceState(preview.state)
+    setPreview(null)
+    setImportError(null)
+    setImportSuccess(summary)
+  }
 
   return (
     <div className="animate-fade-up max-w-3xl space-y-4">
@@ -332,16 +432,79 @@ export function SettingsPage() {
           </div>
         </dl>
 
-        <div className="rounded-2xl border border-border p-4">
-          <p className="text-sm font-semibold text-text">{t('settings.exportTitle')}</p>
-          <p className="mt-1 text-sm leading-relaxed text-muted">{t('settings.exportHint')}</p>
-          <Button
-            className="mt-3"
-            icon={<DownloadIcon className="h-4 w-4" />}
-            onClick={handleExport}
+        <div className="rounded-2xl border border-warning/35 bg-warning-soft/55 p-4">
+          <p className="flex items-center gap-2 text-sm font-semibold text-on-warning-soft">
+            <AlertTriangleIcon className="h-4.5 w-4.5" />
+            {t('settings.storageWarningTitle')}
+          </p>
+          <p className="mt-1.5 text-sm leading-relaxed text-muted">
+            {t('settings.storageWarning')}
+          </p>
+        </div>
+
+        {importSuccess ? (
+          <div
+            role="status"
+            className="flex items-start gap-2.5 rounded-2xl border border-success/30 bg-success-soft p-4 text-on-success-soft"
           >
-            {t('settings.exportAction')}
-          </Button>
+            <CheckIcon className="mt-0.5 h-4.5 w-4.5 shrink-0" />
+            <p className="text-sm leading-relaxed">
+              {t('settings.importSuccess', {
+                categories: importSuccess.categories,
+                goals: importSuccess.goals,
+                months: importSuccess.months,
+              })}
+            </p>
+          </div>
+        ) : null}
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-2xl border border-border p-4">
+            <p className="text-sm font-semibold text-text">{t('settings.exportTitle')}</p>
+            <p className="mt-1 text-sm leading-relaxed text-muted">{t('settings.exportHint')}</p>
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-[11px] font-medium text-muted">
+              <ShieldIcon className="h-3.5 w-3.5 text-success" />
+              {t('settings.exportFormat')}
+            </p>
+            <Button
+              className="mt-3"
+              icon={<DownloadIcon className="h-4 w-4" />}
+              onClick={handleExport}
+              disabled={exporting}
+            >
+              {exporting ? t('settings.exportWorking') : t('settings.exportAction')}
+            </Button>
+            {exportError ? (
+              <p role="alert" className="mt-2 text-xs font-medium text-danger">
+                {t('settings.exportError')}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="rounded-2xl border border-border p-4">
+            <p className="text-sm font-semibold text-text">{t('settings.importTitle')}</p>
+            <p className="mt-1 text-sm leading-relaxed text-muted">{t('settings.importHint')}</p>
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-[11px] font-medium text-muted">
+              <ShieldIcon className="h-3.5 w-3.5 text-success" />
+              {t('settings.importSignatureHint')}
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt,text/plain"
+              className="sr-only"
+              onChange={handleFile}
+            />
+            <Button
+              className="mt-3"
+              variant="secondary"
+              icon={<UploadIcon className="h-4 w-4" />}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={reading}
+            >
+              {reading ? t('settings.importReading') : t('settings.importAction')}
+            </Button>
+          </div>
         </div>
 
         <div className="rounded-2xl border border-danger/30 bg-danger-soft/50 p-4">
@@ -377,10 +540,142 @@ export function SettingsPage() {
           </p>
         </div>
 
+        <div className="rounded-2xl border border-border p-4">
+          <p className="flex items-center gap-2 text-sm font-semibold text-text">
+            <RotateIcon className="h-4 w-4 text-primary-strong" />
+            {t('settings.onboardingTitle')}
+          </p>
+          <p className="mt-1 text-sm leading-relaxed text-muted">
+            {t('settings.onboardingHint')}
+          </p>
+          <Button
+            variant="secondary"
+            className="mt-3"
+            icon={<SparklesIcon className="h-4 w-4" />}
+            onClick={replayOnboarding}
+          >
+            {t('settings.onboardingAction')}
+          </Button>
+        </div>
+
         <p className="border-t border-border pt-3 text-xs text-muted">
           {t('settings.version')} {APP_VERSION} · {t('common.appName')}
         </p>
       </Card>
+
+      {preview ? (
+        <Modal
+          open
+          onClose={() => setPreview(null)}
+          title={t('settings.importPreviewTitle')}
+          description={importFileName}
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setPreview(null)}>
+                {t('common.cancel')}
+              </Button>
+              <Button onClick={confirmImport} icon={<CheckIcon className="h-4 w-4" />}>
+                {t('settings.importConfirm')}
+              </Button>
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            <div className="rounded-2xl bg-surface-2 p-3.5 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-muted">{t('settings.importGenerated')}</span>
+                <span className="font-medium text-text">
+                  {formatDateTime(preview.exportedAt)}
+                </span>
+              </div>
+              <div className="mt-1.5 flex items-center justify-between gap-3">
+                <span className="text-muted">{t('settings.version')}</span>
+                <span className="font-medium text-text">v{preview.appVersion}</span>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">
+                {t('settings.importContents')}
+              </p>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <div className="rounded-xl border border-border p-2.5 text-center">
+                  <p className="figure text-sm font-semibold text-text">
+                    {preview.state.categories.length}
+                  </p>
+                  <p className="mt-0.5 text-[10px] leading-tight text-muted">
+                    {t('settings.importCategories', {
+                      count: preview.state.categories.length,
+                    })}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border p-2.5 text-center">
+                  <p className="figure text-sm font-semibold text-text">
+                    {preview.state.goals.length}
+                  </p>
+                  <p className="mt-0.5 text-[10px] leading-tight text-muted">
+                    {t('settings.importGoals', { count: preview.state.goals.length })}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border p-2.5 text-center">
+                  <p className="figure text-sm font-semibold text-text">
+                    {preview.state.budgets.length}
+                  </p>
+                  <p className="mt-0.5 text-[10px] leading-tight text-muted">
+                    {t('settings.importMonths', { count: preview.state.budgets.length })}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface-2 p-3.5 text-sm">
+              <span className="text-muted">{t('settings.importIncome')}</span>
+              <span className="figure font-semibold text-text">
+                {formatMoney(preview.state.income.netAmount)}
+              </span>
+            </div>
+
+            <p className="flex items-start gap-2 rounded-2xl border border-success/30 bg-success-soft p-3 text-xs leading-relaxed text-on-success-soft">
+              <ShieldIcon className="mt-0.5 h-4 w-4 shrink-0" />
+              {t('settings.importSignature')}
+            </p>
+
+            <p className="rounded-2xl border border-danger/30 bg-danger-soft/55 p-3 text-xs leading-relaxed text-on-danger-soft">
+              {t('settings.importReplaceWarning')}
+            </p>
+          </div>
+        </Modal>
+      ) : null}
+
+      {importError ? (
+        <Modal
+          open
+          onClose={() => setImportError(null)}
+          size="sm"
+          title={t('settings.importErrorTitle')}
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setImportError(null)}>
+                {t('common.close')}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setImportError(null)
+                  window.setTimeout(() => fileInputRef.current?.click(), 0)
+                }}
+              >
+                {t('settings.importTryAgain')}
+              </Button>
+            </div>
+          }
+        >
+          <div className="flex items-start gap-3 rounded-2xl border border-danger/30 bg-danger-soft/55 p-4 text-on-danger-soft">
+            <AlertTriangleIcon className="mt-0.5 h-5 w-5 shrink-0" />
+            <p className="text-sm leading-relaxed">{t(IMPORT_ERROR_KEY[importError])}</p>
+          </div>
+        </Modal>
+      ) : null}
 
       <Modal
         open={confirmReset}

@@ -203,3 +203,76 @@ export const LayersIcon = (props: IconProps) => (
     <path d="m3 17 9 4.5L21 17" />
   </Svg>
 )
+
+export const SparklesIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M12 3.2 13.6 8l4.8 1.6-4.8 1.6L12 16l-1.6-4.8L5.6 9.6 10.4 8 12 3.2Z" />
+    <path d="m18.5 14.5.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z" />
+    <path d="m5.5 3 .6 1.6L7.7 5.2l-1.6.6L5.5 7.4l-.6-1.6L3.3 5.2l1.6-.6L5.5 3Z" />
+  </Svg>
+)
+
+export const AlertTriangleIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M10.3 3.9 2.5 17.4A2 2 0 0 0 4.2 20.5h15.6a2 2 0 0 0 1.7-3.1L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+    <path d="M12 9v4" />
+    <path d="M12 16.2h.01" />
+  </Svg>
+)
+
+export const InfoIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 11v5" />
+    <path d="M12 7.6h.01" />
+  </Svg>
+)
+
+export const UploadIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M12 20.5v-11" />
+    <path d="m7.5 14 4.5-4.5 4.5 4.5" />
+    <path d="M4.5 3.5h15" />
+  </Svg>
+)
+
+export const ChevronLeftIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="m14.5 6-6 6 6 6" />
+  </Svg>
+)
+
+export const ChevronRightIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="m9.5 6 6 6-6 6" />
+  </Svg>
+)
+
+export const ArrowRightIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M4 12h15" />
+    <path d="m13.5 6.5 5.5 5.5-5.5 5.5" />
+  </Svg>
+)
+
+export const RotateIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M3.5 8.5A9 9 0 1 1 3 14" />
+    <path d="M3.5 3.5v5h5" />
+  </Svg>
+)
+
+export const BookIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5Z" />
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+    <path d="M8 6.5h8" />
+    <path d="M8 10h5" />
+  </Svg>
+)
+
+export const HeartIcon = (props: IconProps) => (
+  <Svg {...props}>
+    <path d="M20.8 5.8a5.5 5.5 0 0 0-7.8 0L12 6.8l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-7.4a5.5 5.5 0 0 0 0-7.8Z" />
+  </Svg>
+)

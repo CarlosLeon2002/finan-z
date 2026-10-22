@@ -11,6 +11,9 @@ del dispositivo y la app funciona sin conexión.
   mensual o cada N días) y categorías personalizables (emoji, color, monto) con
   gráfica interactiva de distribución. Cada cambio se refleja al instante, sin
   recargar, y también se sincroniza entre pestañas abiertas.
+- **Ingresos fijos o variables**: el modo fijo mantiene un único presupuesto;
+  el modo variable crea un presupuesto independiente por mes (`YYYY-MM`) con su
+  propio ingreso y categorías. Cambiar de mes nunca altera los demás.
 - **Visualizaciones**: la gráfica principal se elige en Ajustes entre cuatro
   estilos —**Dona**, **Barras** (ranking), **Medidor** (% asignado) y
   **Apilada** (ingreso dividido)— con degradados, animaciones suaves y tooltips
@@ -22,10 +25,26 @@ del dispositivo y la app funciona sin conexión.
   financieras adaptados al plazo; proyección de fecha de cumplimiento, registro
   de aportes con atajos de “aporte sugerido” y “completar meta”, y pantalla de
   celebración con confeti al llegar al 100 %.
-- **Tips diarios y frases** de referentes, con índice completo y detalle.
+- **Alertas financieras en vivo**: avisos inmediatos cuando el presupuesto queda
+  en negativo, el ingreso falta, la asignación supera el 90 %, una meta consume
+  demasiado ingreso o el plazo ya venció. Cada alerta sugiere hasta dos métodos
+  de ahorro alternativos según el contexto.
+- **Tip diario**: una sola idea por día, con rotación determinista, frase del día
+  y una biblioteca de consejos inspirados en libros y charlas.
 - **Ajustes**: idioma (español hispanoamericano / inglés de EE. UU.), moneda,
-  exportación de todos los datos a `.txt`, reinicio de datos e instalación como
-  app (PWA).
+  exportación e importación de respaldos `.txt` firmados con SHA-256, repetición
+  de la introducción, reinicio de datos e instalación como app (PWA).
+
+## Novedades de la versión 1.2
+
+- Introducción de cinco pasos, con opción de saltar y aviso explícito sobre el
+  almacenamiento local.
+- Respaldo `.txt` con reporte legible y bloque firmado; la restauración valida
+  formato, checksum y esquema antes de reemplazar los datos.
+- Presupuestos mensuales independientes para ingresos variables.
+- Panel con saludo según la hora, alertas accionables y estado vacío por mes.
+- Navegación con color propio por sección y brillo suave en el icono activo.
+- Tema **V-Rock** renovado: rosa pastel, cálido y profesional.
 
 ## Comandos
 
@@ -47,9 +66,10 @@ src/
 ├── charts/       Registro de Chart.js, tema claro/oscuro y visualizaciones
 │                 (dona, barras, medidor, apilada, anillos, sparklines)
 ├── components/   UI genérica (ui/) y layout (layout/AppShell)
-├── domain/       Lógica pura: metas, partición, ingreso, métodos, tips
+├── domain/       Lógica pura: metas, partición, ingreso, presupuestos por mes,
+│                 alertas, métodos y tips
 ├── features/     Pantallas: dashboard, partition, savings, tips, settings,
-│                 onboarding (selector de idioma) y exportación
+│                 onboarding (idioma + introducción), exportación y respaldos
 ├── hooks/        Utilidades de entrada reutilizables
 ├── i18n/         Diccionarios es-419 / en-US, formato y tipado de claves
 ├── lib/          Helpers de fechas, ids y clases (cn)
@@ -92,9 +112,10 @@ src/
   moderno, propio de herramientas financieras.
 - **Sistema de acentos**: el color de marca vive en `theme/accents.ts` (fuente
   única) y se aplica como tokens `--color-primary*` sobre `<html>`. Hay 8
-  presets —Índigo (por defecto), V-Rock (magenta neón), Océano, Esmeralda,
+  presets —Índigo (por defecto), V-Rock (rosa pastel), Océano, Esmeralda,
   Violeta, Ámbar, Rosa y Grafito— con versiones claro/oscuro. Las gráficas
-  leen la misma paleta, así que interfaz y canvas siempre coinciden.
+  leen la misma paleta, así que interfaz y canvas siempre coinciden. V-Rock
+  añade además un lavado rosa suave al fondo.
 - **Modo de tema** claro/oscuro/automático vía `data-theme` en `<html>`; un
   script inline lo aplica antes del primer pintado para evitar parpadeos.
 
@@ -103,8 +124,9 @@ src/
 - `vite-plugin-pwa` genera el manifest y un service worker (Workbox) que cachea
   los assets: la app abre y funciona sin conexión.
 - **No hay peticiones de red con datos del usuario.** Ni registro, ni analytics,
-  ni sincronización: si borras los datos del navegador, desaparecen (por eso la
-  exportación a `.txt` existe).
+  ni sincronización: si borras los datos del navegador o el almacenamiento del
+  sitio, desaparecen. Por eso la app insiste en exportar un respaldo `.txt`
+  firmado; ese archivo es la única forma de restaurar la información.
 
 ## Stack
 

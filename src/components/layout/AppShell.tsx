@@ -1,7 +1,8 @@
-import type { ComponentType, ReactNode, SVGProps } from 'react'
+import type { ComponentType, CSSProperties, ReactNode, SVGProps } from 'react'
 import { useAppState } from '../../app/state'
 import { useI18n } from '../../app/i18n'
 import { useRoute, type Route } from '../../app/router'
+import { useTheme } from '../../theme/theme'
 import { cn } from '../../lib/cn'
 import type { TranslationKey } from '../../i18n/types'
 import {
@@ -17,14 +18,41 @@ interface NavItem {
   route: Route
   labelKey: TranslationKey
   Icon: ComponentType<SVGProps<SVGSVGElement>>
+  /** Tinte propio de cada acceso; se adapta al tema claro/oscuro. */
+  tint: { light: string; dark: string }
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { route: 'home', labelKey: 'nav.home', Icon: HomeIcon },
-  { route: 'savings', labelKey: 'nav.savings', Icon: WalletIcon },
-  { route: 'partition', labelKey: 'nav.partition', Icon: PieChartIcon },
-  { route: 'tips', labelKey: 'nav.tips', Icon: BulbIcon },
-  { route: 'settings', labelKey: 'nav.settings', Icon: SlidersIcon },
+  {
+    route: 'home',
+    labelKey: 'nav.home',
+    Icon: HomeIcon,
+    tint: { light: '#4f46e5', dark: '#a5b4fc' },
+  },
+  {
+    route: 'savings',
+    labelKey: 'nav.savings',
+    Icon: WalletIcon,
+    tint: { light: '#0f8a63', dark: '#5eead4' },
+  },
+  {
+    route: 'partition',
+    labelKey: 'nav.partition',
+    Icon: PieChartIcon,
+    tint: { light: '#b45309', dark: '#fcd34d' },
+  },
+  {
+    route: 'tips',
+    labelKey: 'nav.tips',
+    Icon: BulbIcon,
+    tint: { light: '#be185d', dark: '#f9a8d4' },
+  },
+  {
+    route: 'settings',
+    labelKey: 'nav.settings',
+    Icon: SlidersIcon,
+    tint: { light: '#0369a1', dark: '#7dd3fc' },
+  },
 ]
 
 /**
@@ -38,6 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { t, locale } = useI18n()
   const { setLocale } = useAppState()
   const { route, navigate } = useRoute()
+  const { isDark } = useTheme()
 
   // Botón rápido de idioma en la cabecera (los detalles viven en Ajustes).
   const toggleLocale = () => setLocale(locale === 'es-419' ? 'en-US' : 'es-419')
@@ -85,35 +114,62 @@ export function AppShell({ children }: { children: ReactNode }) {
         aria-label={t('nav.primary')}
       >
         <div className="pointer-events-auto mx-auto flex w-full max-w-md items-center gap-1 rounded-[1.45rem] border border-border/70 bg-surface/85 p-1.5 shadow-[0_20px_50px_-26px_rgba(10,14,26,0.55)] backdrop-blur-2xl supports-[backdrop-filter]:bg-surface/70">
-          {NAV_ITEMS.map(({ route: target, labelKey, Icon }) => {
+          {NAV_ITEMS.map(({ route: target, labelKey, Icon, tint }) => {
             const isActive = route === target
+            const color = isDark ? tint.dark : tint.light
+            const style = isActive
+              ? ({ '--nav-tint': color } as CSSProperties)
+              : undefined
+
             return (
               <button
                 key={target}
                 type="button"
                 aria-current={isActive ? 'page' : undefined}
                 onClick={() => navigate(target)}
+                style={style}
                 className={cn(
                   'group relative flex flex-1 flex-col items-center gap-0.5 rounded-[1.05rem] px-1 pb-1 pt-1.5 text-[10px] font-medium transition-colors duration-200 sm:text-[11px]',
-                  isActive ? 'text-primary-strong' : 'text-muted hover:text-text',
+                  isActive
+                    ? 'text-[var(--nav-tint)]'
+                    : 'text-muted hover:text-text',
                 )}
               >
-                <span
-                  className={cn(
-                    'grid h-8 w-12 place-items-center rounded-full transition-all duration-300',
-                    isActive
-                      ? 'bg-primary-soft shadow-sm shadow-primary/20'
-                      : 'group-hover:bg-surface-2',
-                  )}
-                >
-                  <Icon
+                <span className="relative grid place-items-center">
+                  {isActive ? (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute h-11 w-14 rounded-full opacity-55 blur-lg"
+                      style={{
+                        background: `radial-gradient(50% 55% at 50% 50%, ${color}, transparent 72%)`,
+                      }}
+                    />
+                  ) : null}
+                  <span
                     className={cn(
-                      'h-[21px] w-[21px] transition-transform duration-300',
-                      isActive ? 'scale-105' : 'group-active:scale-95',
+                      'relative grid h-8 w-12 place-items-center rounded-full transition-all duration-300',
+                      !isActive && 'group-hover:bg-surface-2',
                     )}
-                  />
+                    style={
+                      isActive
+                        ? {
+                            backgroundColor: `color-mix(in oklab, ${color} 16%, transparent)`,
+                            boxShadow: `0 0 20px ${color}38`,
+                          }
+                        : undefined
+                    }
+                  >
+                    <Icon
+                      className={cn(
+                        'h-[21px] w-[21px] transition-all duration-300',
+                        isActive
+                          ? 'scale-105 drop-shadow-[0_0_5px_var(--nav-tint)]'
+                          : 'group-active:scale-95',
+                      )}
+                    />
+                  </span>
                 </span>
-                <span className={cn('transition-colors', isActive && 'font-semibold')}>
+                <span className={cn('relative transition-colors', isActive && 'font-semibold')}>
                   {t(labelKey)}
                 </span>
               </button>

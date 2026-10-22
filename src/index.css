@@ -97,6 +97,21 @@ html[data-theme='dark'] {
   --color-on-danger-soft: #fb8ba0;
 }
 
+/* V-Rock: lavado rosa pastel, romántico pero discreto, detrás de la interfaz. */
+html[data-accent='vrock'] body {
+  background-image:
+    radial-gradient(65rem 42rem at 108% -8%, color-mix(in oklab, #f4a7c8 26%, transparent), transparent 62%),
+    radial-gradient(55rem 38rem at -12% 108%, color-mix(in oklab, #f9c8dc 22%, transparent), transparent 60%);
+  background-attachment: fixed;
+}
+
+html[data-theme='dark'][data-accent='vrock'] body {
+  background-image:
+    radial-gradient(65rem 42rem at 108% -8%, color-mix(in oklab, #7d2d57 34%, transparent), transparent 64%),
+    radial-gradient(55rem 38rem at -12% 108%, color-mix(in oklab, #5e2344 28%, transparent), transparent 62%);
+  background-attachment: fixed;
+}
+
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;

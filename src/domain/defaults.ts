@@ -49,9 +49,13 @@ export function createDefaultState(): AppState {
       accent: 'indigo',
       themeMode: 'auto',
       chartStyle: 'donut',
+      onboardingCompletedAt: null,
+      budgetMode: 'fixed',
+      activeMonth: null,
     },
     income: createDefaultIncome(),
     categories: DEFAULT_CATEGORY_PRESETS.map((preset) => createCategory(preset)),
     goals: [],
+    budgets: [],
   }
 }

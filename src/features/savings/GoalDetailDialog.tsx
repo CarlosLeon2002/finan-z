@@ -4,6 +4,8 @@ import { useAppState } from '../../app/state'
 import { SavingsProjection } from '../../charts/SavingsProjection'
 import { ContributionBars } from '../../charts/ContributionBars'
 import { ProgressRing } from '../../charts/ProgressRing'
+import { resolveBudget } from '../../domain/budget'
+import { goalAlerts } from '../../domain/insights'
 import { findMethod } from '../../domain/methods'
 import { findObjective } from '../../domain/objectives'
 import { buildProjection, computeGoal } from '../../domain/savings'
@@ -16,6 +18,7 @@ import { Button } from '../../components/ui/Button'
 import { AffixedInput, Field, Input } from '../../components/ui/Field'
 import { Badge, ProgressBar } from '../../components/ui/Feedback'
 import { CheckIcon, PlusIcon, TrashIcon } from '../../components/ui/Icon'
+import { SmartAlerts } from '../../components/finance/SmartAlerts'
 import { Modal } from '../../components/ui/Modal'
 import { describePerPeriod } from './periodText'
 import { GoalCompletedDialog } from './GoalCompletedDialog'
@@ -132,7 +135,7 @@ interface GoalDetailDialogProps {
 /** Detalle de una meta: gráfica de proyección, plan y registro de aportes. */
 export function GoalDetailDialog({ open, goal, onClose, onRemove }: GoalDetailDialogProps) {
   const { t, formatMoney, formatPercent, formatDate, formatNumber } = useI18n()
-  const { addContribution, removeContribution } = useAppState()
+  const { state, addContribution, removeContribution } = useAppState()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
 
@@ -155,6 +158,12 @@ export function GoalDetailDialog({ open, goal, onClose, onRemove }: GoalDetailDi
   const objective = findObjective(goal.objective)
   const i18n = { t, formatMoney }
   const isComplete = math.target > 0 && math.currentSaved >= math.target
+  const alerts = goalAlerts(
+    state,
+    resolveBudget(state),
+    { money: formatMoney, percent: formatPercent },
+    goal.id,
+  )
 
   const handleAdd = (input: { date: string; amount: number }) => {
     const wasComplete = math.target > 0 && math.currentSaved >= math.target
@@ -308,6 +317,10 @@ export function GoalDetailDialog({ open, goal, onClose, onRemove }: GoalDetailDi
             />
           </div>
         )}
+
+        {!isComplete && alerts.length > 0 ? (
+          <SmartAlerts alerts={alerts} scope="goal" limit={1} />
+        ) : null}
 
         {/* Proyección */}
         <div className="rounded-2xl border border-border p-4">

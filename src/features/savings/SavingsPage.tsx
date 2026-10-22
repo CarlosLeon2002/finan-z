@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useI18n } from '../../app/i18n'
 import { useAppState } from '../../app/state'
+import { resolveBudget } from '../../domain/budget'
+import { buildSmartAlerts } from '../../domain/insights'
 import { SAVINGS_METHODS } from '../../domain/methods'
 import { findObjective } from '../../domain/objectives'
 import { computeGoal } from '../../domain/savings'
@@ -11,7 +13,8 @@ import type { SavingsGoal } from '../../types'
 import { Button } from '../../components/ui/Button'
 import { Card, SectionHeader } from '../../components/ui/Card'
 import { Badge, EmptyState, ProgressBar } from '../../components/ui/Feedback'
-import { CheckIcon, PencilIcon, PlusIcon } from '../../components/ui/Icon'
+import { CheckIcon, PencilIcon, PlusIcon, SparklesIcon } from '../../components/ui/Icon'
+import { SmartAlerts } from '../../components/finance/SmartAlerts'
 import { GoalDetailDialog } from './GoalDetailDialog'
 import { GoalDialog } from './GoalDialog'
 import { describePerPeriod } from './periodText'
@@ -138,12 +141,18 @@ function GoalCard({ goal, onOpen, onEdit }: GoalCardProps) {
 
 /** Sección de metas: tarjetas, alta/edición y catálogo de métodos. */
 export function SavingsPage() {
-  const { t } = useI18n()
+  const { t, formatMoney, formatPercent } = useI18n()
   const { state, saveGoal, removeGoal } = useAppState()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<SavingsGoal | null>(null)
   const [detailId, setDetailId] = useState<string | null>(null)
   const [showCatalog, setShowCatalog] = useState(false)
+
+  const view = resolveBudget(state)
+  const alerts = buildSmartAlerts(state, view, {
+    money: formatMoney,
+    percent: formatPercent,
+  }).filter((alert) => alert.scope === 'goal')
 
   const detailGoal = state.goals.find((goal) => goal.id === detailId) ?? null
   const goals = state.goals
@@ -181,6 +190,19 @@ export function SavingsPage() {
           </Button>
         }
       />
+
+      {alerts.length > 0 ? (
+        <section aria-labelledby="savings-alerts">
+          <h2
+            id="savings-alerts"
+            className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-muted"
+          >
+            <SparklesIcon className="h-3.5 w-3.5" />
+            {t('dashboard.alertsTitle')}
+          </h2>
+          <SmartAlerts alerts={alerts} scope="goal" limit={2} />
+        </section>
+      ) : null}
 
       {goals.length === 0 ? (
         <EmptyState

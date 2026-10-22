@@ -6,7 +6,15 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { AppState, Contribution, ExpenseCategory, IncomeProfile, SavingsGoal } from '../types'
+import type {
+  AppState,
+  BudgetMode,
+  BudgetMonth,
+  Contribution,
+  ExpenseCategory,
+  IncomeProfile,
+  SavingsGoal,
+} from '../types'
 import { createDefaultState } from '../domain/defaults'
 import { createId } from '../lib/id'
 import { clearState, getSavedAt, loadState, saveState, subscribeToStorage } from '../storage/localStore'
@@ -134,6 +142,106 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }))
   }, [])
 
+  const setBudgetMode = useCallback((budgetMode: BudgetMode) => {
+    setState((previous) => ({
+      ...previous,
+      settings: { ...previous.settings, budgetMode },
+    }))
+  }, [])
+
+  const setActiveMonth = useCallback((activeMonth: string) => {
+    setState((previous) => ({
+      ...previous,
+      settings: { ...previous.settings, activeMonth },
+    }))
+  }, [])
+
+  const saveBudgetMonth = useCallback((budget: BudgetMonth) => {
+    // El sello de edición se centraliza aquí para que cualquier cambio del mes
+    // (ingreso, categorías o notas) quede fechado de forma consistente.
+    const stamped = { ...budget, updatedAt: new Date().toISOString() }
+    setState((previous) => {
+      const exists = previous.budgets.some((item) => item.id === stamped.id)
+      const budgets = exists
+        ? previous.budgets.map((item) => (item.id === stamped.id ? stamped : item))
+        : [...previous.budgets, stamped]
+      return {
+        ...previous,
+        budgets: budgets.sort((a, b) => (a.id < b.id ? -1 : 1)),
+      }
+    })
+  }, [])
+
+  const removeBudgetMonth = useCallback((monthKey: string) => {
+    setState((previous) => ({
+      ...previous,
+      budgets: previous.budgets.filter((item) => item.id !== monthKey),
+      settings: {
+        ...previous.settings,
+        activeMonth:
+          previous.settings.activeMonth === monthKey ? null : previous.settings.activeMonth,
+      },
+    }))
+  }, [])
+
+  const upsertBudgetCategory = useCallback((monthKey: string, category: ExpenseCategory) => {
+    setState((previous) => ({
+      ...previous,
+      budgets: previous.budgets.map((budget) => {
+        if (budget.id !== monthKey) return budget
+        const exists = budget.categories.some((item) => item.id === category.id)
+        return {
+          ...budget,
+          updatedAt: new Date().toISOString(),
+          categories: exists
+            ? budget.categories.map((item) => (item.id === category.id ? category : item))
+            : [...budget.categories, category],
+        }
+      }),
+    }))
+  }, [])
+
+  const removeBudgetCategory = useCallback((monthKey: string, categoryId: string) => {
+    setState((previous) => ({
+      ...previous,
+      budgets: previous.budgets.map((budget) =>
+        budget.id === monthKey
+          ? {
+              ...budget,
+              updatedAt: new Date().toISOString(),
+              categories: budget.categories.filter((item) => item.id !== categoryId),
+            }
+          : budget,
+      ),
+    }))
+  }, [])
+
+  const completeOnboarding = useCallback(() => {
+    setState((previous) =>
+      previous.settings.onboardingCompletedAt
+        ? previous
+        : {
+            ...previous,
+            settings: {
+              ...previous.settings,
+              onboardingCompletedAt: new Date().toISOString(),
+            },
+          },
+    )
+  }, [])
+
+  const replayOnboarding = useCallback(() => {
+    setState((previous) => ({
+      ...previous,
+      settings: { ...previous.settings, onboardingCompletedAt: null },
+    }))
+  }, [])
+
+  const replaceState = useCallback((next: AppState) => {
+    setState(next)
+    setSavedAt(new Date().toISOString())
+  }, [])
+
   const resetData = useCallback(() => {
     // Preferencias (idioma/moneda) intactas: se borra solo lo financiero.
     clearState()
@@ -159,6 +267,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       removeGoal,
       addContribution,
       removeContribution,
+      setBudgetMode,
+      setActiveMonth,
+      saveBudgetMonth,
+      removeBudgetMonth,
+      upsertBudgetCategory,
+      removeBudgetCategory,
+      completeOnboarding,
+      replayOnboarding,
+      replaceState,
       resetData,
     }),
     [
@@ -176,6 +293,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       removeGoal,
       addContribution,
       removeContribution,
+      setBudgetMode,
+      setActiveMonth,
+      saveBudgetMonth,
+      removeBudgetMonth,
+      upsertBudgetCategory,
+      removeBudgetCategory,
+      completeOnboarding,
+      replayOnboarding,
+      replaceState,
       resetData,
     ],
   )

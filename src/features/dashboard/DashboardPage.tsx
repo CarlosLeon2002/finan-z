@@ -1,18 +1,37 @@
+import { useState } from 'react'
 import { useI18n } from '../../app/i18n'
 import { useRoute } from '../../app/router'
 import { useAppState } from '../../app/state'
 import { IncomeChart, type DoughnutSlice } from '../../charts/IncomeChart'
 import { Sparkline } from '../../charts/Sparkline'
+import { monthLabel, resolveBudget } from '../../domain/budget'
+import { buildSmartAlerts } from '../../domain/insights'
 import { computeGoal } from '../../domain/savings'
 import { computeTotals } from '../../domain/partition'
 import { findObjective } from '../../domain/objectives'
 import { pickText, quoteOfTheDay, tipOfTheDay } from '../../domain/tips'
+import type { TranslationKey } from '../../i18n/types'
 import { cn } from '../../lib/cn'
 import { AnimatedNumber } from '../../components/ui/AnimatedNumber'
 import { Button } from '../../components/ui/Button'
 import { Card, SectionHeader } from '../../components/ui/Card'
 import { Badge, EmptyState, ProgressBar } from '../../components/ui/Feedback'
-import { TrendingUpIcon } from '../../components/ui/Icon'
+import { SparklesIcon, TrendingUpIcon } from '../../components/ui/Icon'
+import { SmartAlerts } from '../../components/finance/SmartAlerts'
+
+function isFirstDay(completedAt: string | null, now: number): boolean {
+  return completedAt ? now - new Date(completedAt).getTime() < 86_400_000 : false
+}
+
+/** Saludo acorde al momento del día; nunca “de nuevo” en la primera visita. */
+function greetingKey(completedAt: string | null, now: number): TranslationKey {
+  if (isFirstDay(completedAt, now)) return 'dashboard.greetingFirst'
+
+  const hour = new Date(now).getHours()
+  if (hour < 12) return 'dashboard.greetingMorning'
+  if (hour < 19) return 'dashboard.greetingAfternoon'
+  return 'dashboard.greetingEvening'
+}
 
 interface StatCardProps {
   label: string
@@ -50,12 +69,16 @@ export function DashboardPage() {
   const { state } = useAppState()
   const { t, locale, formatMoney, formatPercent } = useI18n()
   const { navigate } = useRoute()
+  // Se congela al montar la pantalla: el saludo es estable durante la visita.
+  const [now] = useState(() => Date.now())
 
-  const totals = computeTotals(state.categories, state.income.netAmount)
+  const view = resolveBudget(state)
+  const totals = computeTotals(view.categories, view.income)
+  const alerts = buildSmartAlerts(state, view, { money: formatMoney, percent: formatPercent })
   const tip = tipOfTheDay()
   const quote = quoteOfTheDay()
 
-  const slices: DoughnutSlice[] = state.categories
+  const slices: DoughnutSlice[] = view.categories
     .filter((category) => category.amount > 0)
     .map((category) => ({
       id: category.id,
@@ -64,17 +87,19 @@ export function DashboardPage() {
       color: category.color,
     }))
 
-  const topExpense = state.categories.reduce(
-    (best, category) => (category.amount > best.amount ? category : best),
-    state.categories[0],
-  )
+  const topExpense = [...view.categories].sort((a, b) => b.amount - a.amount)[0]
   const hasTopExpense = topExpense && topExpense.amount > 0
 
   const goalRows = state.goals
     .map((goal) => ({ goal, math: computeGoal(goal) }))
     .sort((a, b) => b.math.progress - a.math.progress)
 
-  const needsIncome = state.income.netAmount <= 0 && totals.assigned === 0
+  const needsIncome = view.isVariable
+    ? view.isEmpty
+    : view.income <= 0 && totals.assigned === 0
+  const visibleAlerts = needsIncome
+    ? alerts.filter((alert) => alert.scope === 'goal')
+    : alerts
 
   return (
     <div className="animate-fade-up space-y-4">
@@ -86,8 +111,22 @@ export function DashboardPage() {
         />
         <div className="relative flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{t('dashboard.greeting')}</h1>
-            <p className="mt-1 text-sm text-white/80">{t('dashboard.subtitle')}</p>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {t(greetingKey(state.settings.onboardingCompletedAt, now))}
+            </h1>
+            <p className="mt-1 text-sm text-white/80">
+              {t(
+                isFirstDay(state.settings.onboardingCompletedAt, now)
+                  ? 'dashboard.subtitleFirst'
+                  : 'dashboard.subtitle',
+              )}
+            </p>
+            {view.isVariable && view.monthKey ? (
+              <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur-sm">
+                <SparklesIcon className="h-3.5 w-3.5" />
+                {t('dashboard.monthBudget', { month: monthLabel(view.monthKey, locale) })}
+              </p>
+            ) : null}
           </div>
           <TrendingUpIcon className="hidden h-10 w-10 text-white/70 md:block" />
         </div>
@@ -95,14 +134,31 @@ export function DashboardPage() {
 
       {needsIncome ? (
         <Card className="flex flex-wrap items-center justify-between gap-4 p-5">
-          <p className="max-w-xl text-sm leading-relaxed text-muted">{t('dashboard.noIncome')}</p>
-          <Button onClick={() => navigate('partition')}>{t('dashboard.fillIncome')}</Button>
+          <div className="max-w-xl">
+            <p className="text-sm font-semibold text-text">
+              {view.isVariable
+                ? t('dashboard.monthEmptyTitle', {
+                    month: monthLabel(view.monthKey ?? '', locale),
+                  })
+                : t('dashboard.noIncome')}
+            </p>
+            {view.isVariable ? (
+              <p className="mt-1 text-xs leading-relaxed text-muted">
+                {t('dashboard.monthEmptyText')}
+              </p>
+            ) : null}
+          </div>
+          <Button onClick={() => navigate('partition')}>
+            {view.isVariable
+              ? t('dashboard.createMonthBudget')
+              : t('dashboard.fillIncome')}
+          </Button>
         </Card>
       ) : (
         <section className="grid gap-4 sm:grid-cols-3">
           <StatCard
             label={t('dashboard.incomeTitle')}
-            value={state.income.netAmount}
+            value={view.income}
             format={formatMoney}
           />
           <StatCard
@@ -127,6 +183,19 @@ export function DashboardPage() {
           />
         </section>
       )}
+
+      {visibleAlerts.length > 0 ? (
+        <section aria-labelledby="dashboard-alerts">
+          <h2
+            id="dashboard-alerts"
+            className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-muted"
+          >
+            <SparklesIcon className="h-3.5 w-3.5" />
+            {t('dashboard.alertsTitle')}
+          </h2>
+          <SmartAlerts alerts={visibleAlerts} onNavigate={navigate} />
+        </section>
+      ) : null}
 
       <section className="grid gap-4 md:grid-cols-3">
         <Card className="p-5 md:col-span-2">

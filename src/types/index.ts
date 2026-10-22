@@ -58,6 +58,13 @@ export const CHART_STYLES = ['donut', 'ranking', 'gauge', 'stacked'] as const
 
 export type ChartStyle = (typeof CHART_STYLES)[number]
 
+/**
+ * Forma de presupuestar:
+ * - `fixed`: un ingreso de referencia y una sola partición.
+ * - `variable`: un presupuesto independiente por mes (`budgets`).
+ */
+export type BudgetMode = 'fixed' | 'variable'
+
 export interface Settings {
   /** `null` = la app nunca ha preguntado idioma (pantalla de bienvenida). */
   locale: Locale | null
@@ -66,6 +73,12 @@ export interface Settings {
   themeMode: ThemeMode
   /** Cómo se muestra la distribución del ingreso. */
   chartStyle: ChartStyle
+  /** ISO de cuando se completó (o se saltó) la introducción. `null` = pendiente. */
+  onboardingCompletedAt: string | null
+  /** Presupuesto fijo o presupuestos mensuales independientes. */
+  budgetMode: BudgetMode
+  /** Mes visible en modo variable (`YYYY-MM`). */
+  activeMonth: string | null
 }
 
 export interface IncomeProfile {
@@ -140,6 +153,21 @@ export interface Contribution {
   amount: number
 }
 
+/**
+ * Presupuesto de un mes concreto. Es totalmente independiente de los demás:
+ * cambiar sus montos no altera meses anteriores ni posteriores.
+ */
+export interface BudgetMonth {
+  /** Clave del mes `YYYY-MM`; solo puede existir un registro por mes. */
+  id: string
+  /** Ingreso neto de ese mes (puede ser 0). */
+  income: number
+  categories: ExpenseCategory[]
+  /** Nota breve opcional (ej. “mes con bono”, “trabajo freelance”). */
+  note: string
+  updatedAt: string
+}
+
 export interface SavingsGoal {
   id: string
   title: string
@@ -165,4 +193,6 @@ export interface AppState {
   income: IncomeProfile
   categories: ExpenseCategory[]
   goals: SavingsGoal[]
+  /** Presupuestos independientes por mes (modo variable). */
+  budgets: BudgetMonth[]
 }

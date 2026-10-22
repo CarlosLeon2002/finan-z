@@ -51,7 +51,8 @@ const darken = (hex: string, amount: number) => mix(hexToRgb(hex), BLACK, 1 - am
 /** Matiz base de cada preset: tono en claro y su versión luminosa en oscuro. */
 const BASE: Record<AccentId, { light: string; dark: string }> = {
   indigo: { light: '#4a51c8', dark: '#8b90f2' },
-  vrock: { light: '#ff2eb8', dark: '#ff74cf' },
+  // Rosa intenso y legible; los tonos suaves derivados son pastel.
+  vrock: { light: '#c2418a', dark: '#c9558c' },
   ocean: { light: '#1e88d6', dark: '#54b6f0' },
   emerald: { light: '#12946d', dark: '#3fcf9e' },
   violet: { light: '#7d4fe0', dark: '#a78bfa' },

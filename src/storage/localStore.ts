@@ -1,5 +1,5 @@
-import type { AccentId, AppState, ChartStyle, ThemeMode } from '../types'
-import { ACCENT_IDS, CHART_STYLES } from '../types'
+import type { AppState } from '../types'
+import { isRecord, normalizeStoredState } from './schema'
 
 /**
  * Persistencia local: un único registro en `localStorage`.
@@ -10,50 +10,25 @@ import { ACCENT_IDS, CHART_STYLES } from '../types'
  */
 
 const STORAGE_KEY = 'finanzas-personales::state'
-const SCHEMA_VERSION = 1 as const
 
 interface StoredRecord {
   savedAt: string
   data: AppState
 }
 
-/** Comprobación defensiva: si el registro no parece válido, no se usa. */
-function isStoredRecord(value: unknown): value is StoredRecord {
-  if (typeof value !== 'object' || value === null) return false
-  const record = value as Partial<StoredRecord>
-  if (typeof record.savedAt !== 'string') return false
-
-  const data = record.data as Partial<AppState> | undefined
-  if (!data || typeof data !== 'object') return false
-  if (data.version !== SCHEMA_VERSION) return false
-  if (!data.settings || typeof data.settings.currency !== 'string') return false
-  if (!Array.isArray(data.categories) || !Array.isArray(data.goals)) return false
-  if (!data.income || typeof data.income.netAmount !== 'number') return false
-
-  return true
-}
-
 /**
- * Rellena preferencias de interfaz añadidas después de la primera versión.
- * Un registro v1 anterior a `accent`/`themeMode`/`chartStyle` sigue siendo
- * válido: aquí se completan con los valores por defecto sin tocar datos.
+ * Lee un registro y normaliza las preferencias añadidas en versiones nuevas.
+ * Si el contenido no cumple el esquema, devuelve `null` para no arrastrar
+ * datos corruptos.
  */
-function withAppearance(data: AppState): AppState {
-  const accentOk = ACCENT_IDS.includes(data.settings.accent)
-  const modeList: ThemeMode[] = ['auto', 'light', 'dark']
-  const modeOk = modeList.includes(data.settings.themeMode)
-  const chartOk = CHART_STYLES.includes(data.settings.chartStyle)
-  if (accentOk && modeOk && chartOk) return data
+function parseRecord(value: unknown): StoredRecord | null {
+  if (!isRecord(value)) return null
+  if (typeof value.savedAt !== 'string') return null
 
-  return {
-    ...data,
-    settings: {
-      ...data.settings,
-      accent: accentOk ? data.settings.accent : ('indigo' as AccentId),
-      themeMode: modeOk ? data.settings.themeMode : 'auto',
-      chartStyle: chartOk ? data.settings.chartStyle : ('donut' as ChartStyle),
-    },
-  }
+  const data = normalizeStoredState(value.data)
+  if (!data) return null
+
+  return { savedAt: value.savedAt, data }
 }
 
 /** Devuelve el estado guardado o `null` si no existe / está corrupto. */
@@ -64,13 +39,13 @@ export function loadState(): AppState | null {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
 
-    const parsed: unknown = JSON.parse(raw)
-    if (!isStoredRecord(parsed)) {
+    const record = parseRecord(JSON.parse(raw))
+    if (!record) {
       // Registro ilegible: lo retiramos para evitar arrastrar datos corruptos.
       clearState()
       return null
     }
-    return withAppearance(parsed.data)
+    return record.data
   } catch {
     return null
   }
@@ -127,9 +102,9 @@ export function subscribeToStorage(
   const handleStorage = (event: StorageEvent) => {
     if (event.key !== STORAGE_KEY || !event.newValue) return
     try {
-      const parsed: unknown = JSON.parse(event.newValue)
-      if (!isStoredRecord(parsed)) return
-      listener({ data: withAppearance(parsed.data), savedAt: parsed.savedAt })
+      const record = parseRecord(JSON.parse(event.newValue))
+      if (!record) return
+      listener({ data: record.data, savedAt: record.savedAt })
     } catch {
       // Otro contexto escribió un registro ilegible: se ignora sin romper la app.
     }
@@ -145,9 +120,8 @@ export function getSavedAt(): string | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    const parsed: unknown = JSON.parse(raw)
-    if (!isStoredRecord(parsed)) return null
-    return parsed.savedAt
+    const record = parseRecord(JSON.parse(raw))
+    return record?.savedAt ?? null
   } catch {
     return null
   }

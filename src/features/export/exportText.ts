@@ -1,10 +1,12 @@
 import type { I18nValue } from '../../app/i18n'
+import { resolveBudget } from '../../domain/budget'
 import { computeTotals } from '../../domain/partition'
 import { computeGoal } from '../../domain/savings'
 import { findMethod } from '../../domain/methods'
 import { findObjective } from '../../domain/objectives'
 import { nextPayday } from '../../domain/income'
 import { pickText, quoteOfTheDay, tipOfTheDay } from '../../domain/tips'
+import { buildBackupBlock } from '../backup/backupFormat'
 import { FREQUENCY_LABEL_KEY, TERM_LABEL_KEY } from '../../i18n/keys'
 import { todayISO } from '../../lib/dates'
 import type { AppState, Locale } from '../../types'
@@ -17,12 +19,14 @@ function localeLabel(t: I18nValue['t'], locale: Locale): string {
 }
 
 /**
- * Construye el archivo .txt legible con toda la información de la app.
+ * Construye el archivo `.txt`: un reporte legible para humanos y, al final, el
+ * bloque estructurado firmado que la app usa para restaurar los datos.
  * Se genera en el propio dispositivo; nada viaja por la red.
  */
-export function buildExportText(state: AppState, i18n: I18nValue): string {
+export async function buildExportText(state: AppState, i18n: I18nValue): Promise<string> {
   const { t, locale, formatMoney, formatPercent, formatDate, formatDateTime, formatDuration, currencyName } = i18n
   const lines: string[] = []
+  const view = resolveBudget(state)
 
   lines.push(RULE)
   lines.push(` ${t('common.appName')} — ${t('exportDoc.title')}`)
@@ -30,10 +34,17 @@ export function buildExportText(state: AppState, i18n: I18nValue): string {
   lines.push(`${t('exportDoc.generated')}: ${formatDateTime(new Date())}`)
   lines.push(`${t('exportDoc.language')}: ${localeLabel(t, locale)}`)
   lines.push(`${t('exportDoc.currency')}: ${state.settings.currency} — ${currencyName(state.settings.currency)}`)
+  lines.push(
+    `${t('exportDoc.mode')}: ${
+      state.settings.budgetMode === 'variable'
+        ? t('exportDoc.modeVariable')
+        : t('exportDoc.modeFixed')
+    }`,
+  )
   lines.push('')
 
   // 1. Ingreso -------------------------------------------------------------
-  const totals = computeTotals(state.categories, state.income.netAmount)
+  const totals = computeTotals(view.categories, view.income)
   lines.push(t('exportDoc.income'))
   lines.push(THIN)
   if (state.income.netAmount > 0) {
@@ -45,10 +56,13 @@ export function buildExportText(state: AppState, i18n: I18nValue): string {
   }
   lines.push('')
 
-  // 2. Partición -----------------------------------------------------------
+  // 2. Partición visible (mes activo en modo variable) ----------------------
   lines.push(t('exportDoc.partition'))
   lines.push(THIN)
-  const assigned = [...state.categories]
+  if (view.monthKey) {
+    lines.push(`${t('exportDoc.month')}: ${view.monthKey}`)
+  }
+  const assigned = [...view.categories]
     .filter((category) => category.amount > 0)
     .sort((a, b) => b.amount - a.amount)
 
@@ -69,7 +83,21 @@ export function buildExportText(state: AppState, i18n: I18nValue): string {
   }
   lines.push('')
 
-  // 3. Metas ---------------------------------------------------------------
+  // 3. Presupuestos mensuales (solo si existen) ----------------------------
+  if (state.budgets.length > 0) {
+    lines.push(t('exportDoc.months'))
+    lines.push(THIN)
+    state.budgets.forEach((budget) => {
+      const monthTotals = computeTotals(budget.categories, budget.income)
+      const monthName = i18n.formatDate(new Date(`${budget.id}-01T00:00:00`))
+      lines.push(
+        `  ${monthName.padEnd(26, '.')} ${formatMoney(budget.income).padStart(16)}  ${t('exportDoc.monthAssigned')}: ${formatMoney(monthTotals.assigned)}  ${t('exportDoc.monthRemaining')}: ${formatMoney(monthTotals.remaining)}`,
+      )
+    })
+    lines.push('')
+  }
+
+  // 4. Metas ---------------------------------------------------------------
   lines.push(t('exportDoc.goals'))
   lines.push(THIN)
   if (state.goals.length > 0) {
@@ -107,7 +135,7 @@ export function buildExportText(state: AppState, i18n: I18nValue): string {
     lines.push('')
   }
 
-  // 4. Contenido del día ---------------------------------------------------
+  // 5. Contenido del día ---------------------------------------------------
   const tip = tipOfTheDay()
   const quote = quoteOfTheDay()
   lines.push(t('exportDoc.tips'))
@@ -116,22 +144,25 @@ export function buildExportText(state: AppState, i18n: I18nValue): string {
   lines.push(`${t('tips.quoteOfDay')}: “${pickText(quote.text, locale)}” — ${quote.author}`)
   lines.push('')
   lines.push(RULE)
-  lines.push(` ${t('exportDoc.footer')}`)
+  lines.push(` ${t('exportDoc.backupNote')}`)
   lines.push(RULE)
+  lines.push('')
+
+  lines.push(await buildBackupBlock(state))
   lines.push('')
 
   return lines.join('\n')
 }
 
-/** Genera y descarga el archivo .txt en el dispositivo. */
-export function downloadExport(state: AppState, i18n: I18nValue): void {
-  const content = buildExportText(state, i18n)
+/** Genera y descarga el archivo `.txt` en el dispositivo. */
+export async function downloadExport(state: AppState, i18n: I18nValue): Promise<void> {
+  const content = await buildExportText(state, i18n)
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
   const url = URL.createObjectURL(blob)
 
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = `finanzas-${todayISO()}.txt`
+  anchor.download = `finan-z-backup-${todayISO()}.txt`
   document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()

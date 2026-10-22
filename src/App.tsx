@@ -7,6 +7,7 @@ import { ThemeProvider } from './theme/ThemeProvider'
 import { AppShell } from './components/layout/AppShell'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { LanguageGate } from './features/onboarding/LanguageGate'
+import { OnboardingFlow } from './features/onboarding/OnboardingFlow'
 import { PartitionPage } from './features/partition/PartitionPage'
 import { SavingsPage } from './features/savings/SavingsPage'
 import { SettingsPage } from './features/settings/SettingsPage'
@@ -45,6 +46,9 @@ function Root() {
 
   // Primera visita: elegir idioma antes de mostrar cualquier dato.
   if (state.settings.locale === null) return <LanguageGate />
+
+  // Después del idioma, recorrido introductorio (se puede saltar).
+  if (state.settings.onboardingCompletedAt === null) return <OnboardingFlow />
 
   return (
     <AppShell>

@@ -2,6 +2,8 @@ import { createContext, useContext } from 'react'
 import type {
   AccentId,
   AppState,
+  BudgetMode,
+  BudgetMonth,
   ChartStyle,
   Contribution,
   CurrencyCode,
@@ -33,6 +35,21 @@ export interface AppStateValue {
   removeGoal: (id: string) => void
   addContribution: (goalId: string, input: Omit<Contribution, 'id'>) => void
   removeContribution: (goalId: string, contributionId: string) => void
+  /** Cambia entre presupuesto fijo y presupuestos independientes por mes. */
+  setBudgetMode: (mode: BudgetMode) => void
+  /** Selecciona el mes visible en modo variable (`YYYY-MM`). */
+  setActiveMonth: (monthKey: string) => void
+  /** Crea o actualiza el presupuesto de un mes. */
+  saveBudgetMonth: (budget: BudgetMonth) => void
+  removeBudgetMonth: (monthKey: string) => void
+  upsertBudgetCategory: (monthKey: string, category: ExpenseCategory) => void
+  removeBudgetCategory: (monthKey: string, categoryId: string) => void
+  /** Marca la introducción como completada (o saltada). */
+  completeOnboarding: () => void
+  /** Vuelve a abrir la introducción sin borrar datos. */
+  replayOnboarding: () => void
+  /** Restaura un estado completo validado (importación de respaldo). */
+  replaceState: (state: AppState) => void
   /** Borra los datos financieros y conserva las preferencias. */
   resetData: () => void
 }
