@@ -320,18 +320,14 @@ export const es419 = {
 
   tips: {
     title: 'Consejo del día',
-    subtitle: 'Una idea breve, una frase y un paso concreto. Se renueva a medianoche.',
     tipOfDay: 'Consejo del día',
     quoteOfDay: 'Frase del día',
-    renews: 'Se renueva cada día',
-    onePerDay: '1 al día',
     today: 'Hoy · {date}',
-    nextIn: 'Próximo consejo en {time}',
+    nextInLabel: 'Próximo consejo en',
     source: 'Inspirado en',
     theme: 'Tema',
     applyTitle: 'Para hoy',
     applyBody: 'Elige un gasto pequeño y ponlo a prueba antes de que acabe el día.',
-    ideas: '{count} ideas en rotación',
     themes: {
       mindset: 'Mentalidad',
       habits: 'Hábitos',

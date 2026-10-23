@@ -317,18 +317,14 @@ export const enUS: Dict = {
 
   tips: {
     title: 'Tip of the day',
-    subtitle: 'One short idea, one quote and one concrete step. Renewed at midnight.',
     tipOfDay: 'Tip of the day',
     quoteOfDay: 'Quote of the day',
-    renews: 'Renews daily',
-    onePerDay: '1 per day',
     today: 'Today · {date}',
-    nextIn: 'Next tip in {time}',
+    nextInLabel: 'Next tip in',
     source: 'Inspired by',
     theme: 'Theme',
     applyTitle: 'For today',
     applyBody: 'Pick one small expense and put it to the test before the day ends.',
-    ideas: '{count} ideas in rotation',
     themes: {
       mindset: 'Mindset',
       habits: 'Habits',

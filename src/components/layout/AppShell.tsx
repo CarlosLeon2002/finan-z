@@ -39,13 +39,14 @@ const NAV_ITEMS: NavItem[] = [
     route: 'partition',
     labelKey: 'nav.partition',
     Icon: PieChartIcon,
-    tint: { light: '#b45309', dark: '#fcd34d' },
+    tint: { light: '#be185d', dark: '#f9a8d4' },
   },
   {
     route: 'tips',
     labelKey: 'nav.tips',
     Icon: BulbIcon,
-    tint: { light: '#be185d', dark: '#f9a8d4' },
+    // Amarillo cálido, en sintonía con la bombilla y el consejo diario.
+    tint: { light: '#a16207', dark: '#fbbf24' },
   },
   {
     route: 'settings',

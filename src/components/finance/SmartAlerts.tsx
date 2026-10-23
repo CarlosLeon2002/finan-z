@@ -58,7 +58,7 @@ export function SmartAlerts({
             <div className="flex items-start gap-2.5">
               <Icon className="mt-0.5 h-4.5 w-4.5 shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold">{t(alert.titleKey)}</p>
+                <p className="text-sm font-semibold">{t(alert.titleKey, alert.vars)}</p>
                 <p className="mt-0.5 text-xs leading-relaxed opacity-90">
                   {t(alert.bodyKey, alert.vars)}
                 </p>

@@ -98,7 +98,20 @@ try {
     log(`ruta #/${route}`, text.trim().length > 20, `${text.trim().split('\n').length} líneas`)
   }
 
-  // 3. Ingreso fijo y persistencia.
+  // 3. Copy compacto del consejo diario.
+  await page.goto(`${BASE}#/tips`, { waitUntil: 'networkidle0' })
+  await sleep(300)
+  const tipsText = await page.evaluate(() => document.body.innerText)
+  log('tips: título simple', /Consejo del día|Tip of the day/i.test(tipsText))
+  log(
+    'tips: sin copy redundante',
+    !/1 al día|se renueva cada día|ideas en rotación|1 per day|renews daily|ideas in rotation/i.test(
+      tipsText,
+    ),
+  )
+  log('tips: solo cuenta atrás', /\d+\s?h\s?\d+\s?min/.test(tipsText))
+
+  // 4. Ingreso fijo y persistencia.
   await page.goto(`${BASE}#/partition`, { waitUntil: 'networkidle0' })
   await page.waitForSelector('#net-amount', { timeout: 5000 })
   await page.click('#net-amount', { clickCount: 3 })
@@ -114,7 +127,7 @@ try {
   })
   log('partición: ingreso fijo persistido', stored === 15000, `netAmount=${stored}`)
 
-  // 4. Modo variable: cada mes conserva su propio ingreso.
+  // 5. Modo variable: cada mes conserva su propio ingreso.
   log(
     'partición: cambiar a modo variable',
     await clickButton(page, /^Ingreso variable$|^Variable income$/),
@@ -153,7 +166,7 @@ try {
   log('variable: el mes nuevo nace en cero', twoMonths?.activeIncome === 0)
   log('variable: el mes anterior no cambia', twoMonths?.firstIncome === 15000)
 
-  // 5. Alta de una meta de ahorro.
+  // 6. Alta de una meta de ahorro.
   await page.goto(`${BASE}#/savings`, { waitUntil: 'networkidle0' })
   await page.waitForSelector('button', { timeout: 5000 })
   const opened = await clickButton(page, /crear meta|nueva meta|new goal|create goal/)
@@ -166,7 +179,7 @@ try {
   await page.keyboard.press('Escape').catch(() => {})
   await sleep(200)
 
-  // 6. Exportación firmada y validación de importación.
+  // 7. Exportación firmada y validación de importación.
   await page.goto(`${BASE}#/settings`, { waitUntil: 'networkidle0' })
   const hasExport = await page.evaluate(() => /export/i.test(document.body.innerText))
   log('ajustes: exportación presente', hasExport)
@@ -228,6 +241,74 @@ try {
   const errorText = await page.evaluate(() => document.body.innerText)
   log('importación: rechaza archivo alterado', /firma|checksum|íntegr|integrity/i.test(errorText))
   await clickButton(page, /^Cerrar$|^Close$/)
+
+  // 8. Regresión: los títulos de alerta deben interpolar el nombre de la meta.
+  const alertContext = await browser.createBrowserContext()
+  const alertPage = await alertContext.newPage()
+  await alertPage.setViewport({ width: 1280, height: 900 })
+  await alertPage.goto(BASE, { waitUntil: 'networkidle0' })
+  await alertPage.evaluate(() => {
+    const now = new Date().toISOString()
+    localStorage.setItem(
+      'finanzas-personales::state',
+      JSON.stringify({
+        savedAt: now,
+        data: {
+          version: 1,
+          settings: {
+            locale: 'es-419',
+            currency: 'UYU',
+            accent: 'indigo',
+            themeMode: 'light',
+            chartStyle: 'donut',
+            onboardingCompletedAt: now,
+            budgetMode: 'fixed',
+            activeMonth: null,
+          },
+          income: {
+            netAmount: 1000,
+            payFrequency: 'monthly',
+            paydayDate: '2026-10-25',
+            customIntervalDays: 30,
+          },
+          categories: [
+            {
+              id: 'c1',
+              preset: 'housing',
+              label: 'Hogar',
+              emoji: '🏠',
+              color: '#6366f1',
+              amount: 1000,
+            },
+          ],
+          goals: [
+            {
+              id: 'g1',
+              title: 'Viaje a la playa',
+              objective: 'travel',
+              targetAmount: 6000,
+              initialAmount: 0,
+              startDate: '2026-10-01',
+              methodId: 'm1',
+              horizon: { mode: 'calendar', unit: 'months', value: 6 },
+              contributions: [],
+              createdAt: '2026-10-01',
+            },
+          ],
+          budgets: [],
+        },
+      }),
+    )
+  })
+  await alertPage.reload({ waitUntil: 'networkidle0' })
+  await alertPage.goto(`${BASE}#/home`, { waitUntil: 'networkidle0' })
+  await sleep(400)
+  const alertText = await alertPage.evaluate(() => document.body.innerText)
+  log(
+    'alertas: título con nombre de meta',
+    /Viaje a la playa/.test(alertText) && !/\{title\}/.test(alertText),
+  )
+  await alertContext.close()
 
   log('sin errores JS en consola', errors.length === 0, errors.slice(0, 3).join(' | '))
 

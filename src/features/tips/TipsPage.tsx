@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useI18n } from '../../app/i18n'
-import { pickText, quoteOfTheDay, tipOfTheDay, TIPS, type TipTheme } from '../../domain/tips'
+import { pickText, quoteOfTheDay, tipOfTheDay, type TipTheme } from '../../domain/tips'
 import type { TranslationKey } from '../../i18n/types'
 import { Badge } from '../../components/ui/Feedback'
-import { BulbIcon, CalendarIcon, SparklesIcon, TrendingUpIcon } from '../../components/ui/Icon'
+import { BulbIcon, SparklesIcon, TrendingUpIcon } from '../../components/ui/Icon'
 
 const THEME_KEY: Record<TipTheme, TranslationKey> = {
   mindset: 'tips.themes.mindset',
@@ -48,25 +48,16 @@ export function TipsPage() {
   return (
     <div className="mx-auto flex min-h-[calc(100dvh-13.5rem)] w-full max-w-4xl flex-col justify-center md:min-h-[calc(100dvh-14.5rem)]">
       <section aria-labelledby="daily-tip-title" className="animate-fade-up space-y-3">
-        <header className="flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-strong">
-              {t('tips.title')}
-            </p>
-            <h1
-              id="daily-tip-title"
-              className="mt-1 font-heading text-xl font-semibold tracking-tight text-text sm:text-2xl"
-            >
-              {t('tips.today', { date: formatDate(now) })}
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge tone="primary">{t('tips.onePerDay')}</Badge>
-            <Badge tone="neutral">
-              <CalendarIcon className="h-3.5 w-3.5" />
-              {t('tips.renews')}
-            </Badge>
-          </div>
+        <header>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-strong">
+            {t('tips.today', { date: formatDate(now) })}
+          </p>
+          <h1
+            id="daily-tip-title"
+            className="mt-1 font-heading text-xl font-semibold tracking-tight text-text sm:text-2xl"
+          >
+            {t('tips.title')}
+          </h1>
         </header>
 
         <div className="grid gap-3 md:grid-cols-[1.35fr_0.65fr] md:items-stretch">
@@ -81,14 +72,9 @@ export function TipsPage() {
             </span>
 
             <div className="relative flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-on-warning-soft">
-                <span className="grid h-8 w-8 place-items-center rounded-xl bg-warning-soft">
-                  <BulbIcon className="h-4.5 w-4.5" />
-                </span>
-                <span className="text-xs font-semibold uppercase tracking-[0.12em]">
-                  {t('tips.tipOfDay')}
-                </span>
-              </div>
+              <span className="grid h-8 w-8 place-items-center rounded-xl bg-warning-soft text-on-warning-soft">
+                <BulbIcon className="h-4.5 w-4.5" />
+              </span>
               <Badge tone="warning">{t(THEME_KEY[tip.theme])}</Badge>
             </div>
 
@@ -129,13 +115,13 @@ export function TipsPage() {
             <article className="flex items-center justify-between gap-3 rounded-[1.4rem] border border-border bg-surface-2/70 px-4 py-3">
               <div className="min-w-0">
                 <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted">
-                  {t('tips.ideas', { count: TIPS.length })}
+                  {t('tips.nextInLabel')}
                 </p>
-                <p className="mt-0.5 truncate text-sm font-semibold text-text">
-                  {t('tips.nextIn', { time: untilMidnight(now, locale) })}
+                <p className="figure mt-0.5 truncate text-lg font-semibold text-text">
+                  {untilMidnight(now, locale)}
                 </p>
               </div>
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-soft text-on-primary-soft">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-warning-soft text-on-warning-soft">
                 <SparklesIcon className="h-4.5 w-4.5" />
               </span>
             </article>
