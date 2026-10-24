@@ -104,7 +104,7 @@ export function DashboardPage() {
   return (
     <div className="animate-fade-up space-y-4">
       {/* Encabezado con degradado del acento activo */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-primary-strong p-6 text-white shadow-lg shadow-primary/25 md:p-8">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-primary-strong p-6 text-on-primary shadow-lg shadow-primary/25 md:p-8">
         <div
           className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-20 blur-2xl"
           style={{ background: 'radial-gradient(circle, #fff, transparent 70%)' }}
@@ -114,7 +114,7 @@ export function DashboardPage() {
             <h1 className="text-2xl font-semibold tracking-tight">
               {t(greetingKey(state.settings.onboardingCompletedAt, now))}
             </h1>
-            <p className="mt-1 text-sm text-white/80">
+            <p className="mt-1 text-sm text-on-primary/90">
               {t(
                 isFirstDay(state.settings.onboardingCompletedAt, now)
                   ? 'dashboard.subtitleFirst'
@@ -122,13 +122,13 @@ export function DashboardPage() {
               )}
             </p>
             {view.isVariable && view.monthKey ? (
-              <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur-sm">
+              <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-on-primary/15 px-3 py-1 text-xs font-medium text-on-primary/90 backdrop-blur-sm">
                 <SparklesIcon className="h-3.5 w-3.5" />
                 {t('dashboard.monthBudget', { month: monthLabel(view.monthKey, locale) })}
               </p>
             ) : null}
           </div>
-          <TrendingUpIcon className="hidden h-10 w-10 text-white/70 md:block" />
+          <TrendingUpIcon className="hidden h-10 w-10 text-on-primary/70 md:block" />
         </div>
       </section>
 

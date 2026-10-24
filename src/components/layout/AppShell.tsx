@@ -5,6 +5,7 @@ import { useRoute, type Route } from '../../app/router'
 import { useTheme } from '../../theme/theme'
 import { cn } from '../../lib/cn'
 import type { TranslationKey } from '../../i18n/types'
+import { BrandLockup } from '../brand/BrandLogo'
 import {
   BulbIcon,
   GlobeIcon,
@@ -27,13 +28,14 @@ const NAV_ITEMS: NavItem[] = [
     route: 'home',
     labelKey: 'nav.home',
     Icon: HomeIcon,
-    tint: { light: '#4f46e5', dark: '#a5b4fc' },
+    // Verde de marca: el resumen es la puerta de entrada a todo.
+    tint: { light: '#0f7a55', dark: '#6ee7b7' },
   },
   {
     route: 'savings',
     labelKey: 'nav.savings',
     Icon: WalletIcon,
-    tint: { light: '#0f8a63', dark: '#5eead4' },
+    tint: { light: '#0f766e', dark: '#5eead4' },
   },
   {
     route: 'partition',
@@ -52,7 +54,7 @@ const NAV_ITEMS: NavItem[] = [
     route: 'settings',
     labelKey: 'nav.settings',
     Icon: SlidersIcon,
-    tint: { light: '#0369a1', dark: '#7dd3fc' },
+    tint: { light: '#475569', dark: '#cbd5e1' },
   },
 ]
 
@@ -75,27 +77,24 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-bg/80 backdrop-blur-xl supports-[backdrop-filter]:bg-bg/65">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+        <div className="mx-auto grid w-full max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-2.5 sm:px-6">
+          <span className="h-9" aria-hidden="true" />
+
           <button
             type="button"
             onClick={() => navigate('home')}
-            className="flex items-center gap-2.5 text-left"
+            className="col-start-2 justify-self-center rounded-2xl px-1 py-1 text-left transition hover:opacity-80"
           >
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-sm font-bold text-white shadow-md shadow-primary/30">
-              $
-            </span>
-            <span className="leading-tight">
-              <span className="block text-sm font-semibold tracking-tight text-text">
-                {t('common.appName')}
-              </span>
-              <span className="hidden text-xs text-muted sm:block">{t('common.tagline')}</span>
-            </span>
+            <BrandLockup
+              subtitle={t('common.tagline')}
+              subtitleClassName="hidden sm:block"
+            />
           </button>
 
           <button
             type="button"
             onClick={toggleLocale}
-            className="flex h-9 items-center gap-1.5 rounded-xl border border-border bg-surface px-2.5 text-sm font-medium text-muted transition hover:text-text"
+            className="col-start-3 flex h-9 items-center gap-1.5 justify-self-end rounded-xl border border-border bg-surface px-2.5 text-sm font-medium text-muted transition hover:text-text"
             title={t('settings.language')}
             aria-label={t('settings.language')}
           >

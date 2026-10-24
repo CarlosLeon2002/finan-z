@@ -1,48 +1,50 @@
 # Finan-Z
 
-PWA personal para organizar el dinero: registra tu ingreso neto, repártelo en una
-gráfica tipo torta, crea metas de ahorro con plazo y método, y recibe un consejo
-cada día. **Sin cuentas, sin nube, sin rastreo**: todo vive en el `localStorage`
-del dispositivo y la app funciona sin conexión.
+PWA personal para organizar tu dinero: registra tu ingreso, reparte tus gastos,
+crea metas de ahorro con plazo y forma de ahorro, y recibe un consejo cada día.
+**Sin cuentas, sin nube, sin rastreo**: todo vive en el `localStorage` del
+dispositivo y la app funciona sin conexión.
 
 ## Funciones
 
-- **Partición del ingreso**: monto neto, frecuencia de cobro (semanal, quincenal,
-  mensual o cada N días) y categorías personalizables (emoji, color, monto) con
-  gráfica interactiva de distribución. Cada cambio se refleja al instante, sin
-  recargar, y también se sincroniza entre pestañas abiertas.
+- **Presupuesto del ingreso**: monto neto, frecuencia de cobro (semanal,
+  quincenal, mensual o cada N días) y categorías personalizables (emoji, color,
+  monto) con una gráfica interactiva de distribución. Cada cambio se refleja al
+  instante y también se sincroniza entre pestañas abiertas.
 - **Ingresos fijos o variables**: el modo fijo mantiene un único presupuesto;
   el modo variable crea un presupuesto independiente por mes (`YYYY-MM`) con su
   propio ingreso y categorías. Cambiar de mes nunca altera los demás.
-- **Visualizaciones**: la gráfica principal se elige en Ajustes entre cuatro
-  estilos —**Dona**, **Barras** (ranking), **Medidor** (% asignado) y
-  **Apilada** (ingreso dividido)— con degradados, animaciones suaves y tooltips
-  flotantes de cristal. Se complementan con anillos de progreso en cada meta,
-  sparklines en las métricas del Panel y barras de aportes en el detalle.
+- **Gráficas**: la principal se elige en Ajustes entre cuatro estilos —**Dona**,
+  **Barras** (ranking), **Medidor** (% asignado) y **Apilada** (ingreso
+  dividido)— con degradados, animaciones suaves y tooltips flotantes. Se
+  complementan con anillos de progreso, sparklines y barras de aportes.
 - **Metas de ahorro**: objetivo predefinido (vehículo, teléfono, herramientas,
-  inversiones, etc.) o personalizado; plazo por duración (días/meses/años) o por
-  número de cobros salariales; métodos de ahorro respaldados por entidades
-  financieras adaptados al plazo; proyección de fecha de cumplimiento, registro
-  de aportes con atajos de “aporte sugerido” y “completar meta”, y pantalla de
+  inversiones, etc.) o personalizado; plazo por fechas o por número de cobros;
+  formas de ahorrar con base real adaptadas al plazo; proyección de la fecha de
+  cumplimiento, aportes con atajos de “aporte sugerido” y “completar meta”, y
   celebración con confeti al llegar al 100 %.
-- **Alertas financieras en vivo**: avisos inmediatos cuando el presupuesto queda
-  en negativo, el ingreso falta, la asignación supera el 90 %, una meta consume
-  demasiado ingreso o el plazo ya venció. Cada alerta sugiere hasta dos métodos
-  de ahorro alternativos según el contexto.
-- **Tip diario**: una sola idea por día, con rotación determinista, frase del día
-  y una biblioteca de consejos inspirados en libros y charlas.
+- **Avisos útiles**: aparecen cuando el presupuesto queda en negativo, falta el
+  ingreso, la asignación supera el 90 %, una meta consume demasiado ingreso o el
+  plazo ya venció. Cada aviso sugiere hasta dos formas de ahorrar alternativas.
+- **Consejo diario**: una idea por día, junto a una frase y una biblioteca de
+  consejos inspirados en libros y conversaciones sobre dinero.
 - **Ajustes**: idioma (español hispanoamericano / inglés de EE. UU.), moneda,
-  exportación e importación de respaldos `.txt` firmados con SHA-256, repetición
-  de la introducción, reinicio de datos e instalación como app (PWA).
+  copias `.txt` que se comprueban antes de restaurar, repetición de la
+  introducción, reinicio de datos e instalación como app (PWA).
+
+## Novedades de la versión 1.2.1
+
+- Nueva marca: logo centrado, favicon e iconos de instalación actualizados.
+- Paleta principal verde, con contraste comprobado en modo claro y oscuro.
+- Textos más naturales en la introducción, los ajustes, las copias y los avisos.
 
 ## Novedades de la versión 1.2
 
-- Introducción de cinco pasos, con opción de saltar y aviso explícito sobre el
-  almacenamiento local.
-- Respaldo `.txt` con reporte legible y bloque firmado; la restauración valida
-  formato, checksum y esquema antes de reemplazar los datos.
+- Introducción de cinco pasos, con opción de saltar y aviso claro sobre dónde se
+  guardan los datos.
+- Copia `.txt` legible que se valida antes de restaurar.
 - Presupuestos mensuales independientes para ingresos variables.
-- Panel con saludo según la hora, alertas accionables y estado vacío por mes.
+- Panel con saludo según la hora, avisos útiles y estado vacío por mes.
 - Navegación con color propio por sección y brillo suave en el icono activo.
 - Tema **V-Rock** renovado: rosa pastel, cálido y profesional.
 
@@ -65,11 +67,11 @@ src/
 ├── app/          Estado global, i18n y router (por hash, sin dependencias)
 ├── charts/       Registro de Chart.js, tema claro/oscuro y visualizaciones
 │                 (dona, barras, medidor, apilada, anillos, sparklines)
-├── components/   UI genérica (ui/) y layout (layout/AppShell)
-├── domain/       Lógica pura: metas, partición, ingreso, presupuestos por mes,
-│                 alertas, métodos y tips
+├── components/   UI genérica (ui/), marca (brand/) y layout (layout/AppShell)
+├── domain/       Lógica pura: metas, presupuesto, ingreso, meses, avisos,
+│                 formas de ahorrar y consejos
 ├── features/     Pantallas: dashboard, partition, savings, tips, settings,
-│                 onboarding (idioma + introducción), exportación y respaldos
+│                 onboarding (idioma + introducción), copias y restauración
 ├── hooks/        Utilidades de entrada reutilizables
 ├── i18n/         Diccionarios es-419 / en-US, formato y tipado de claves
 ├── lib/          Helpers de fechas, ids y clases (cn)
@@ -112,10 +114,11 @@ src/
   moderno, propio de herramientas financieras.
 - **Sistema de acentos**: el color de marca vive en `theme/accents.ts` (fuente
   única) y se aplica como tokens `--color-primary*` sobre `<html>`. Hay 8
-  presets —Índigo (por defecto), V-Rock (rosa pastel), Océano, Esmeralda,
-  Violeta, Ámbar, Rosa y Grafito— con versiones claro/oscuro. Las gráficas
-  leen la misma paleta, así que interfaz y canvas siempre coinciden. V-Rock
-  añade además un lavado rosa suave al fondo.
+  presets —Verde Finan-Z (por defecto), V-Rock (rosa pastel), Océano, Menta,
+  Violeta, Ámbar, Rosa y Grafito— con versiones claro/oscuro. `onPrimary` se
+  calcula por contraste para que el texto de los botones siempre se lea. Las
+  gráficas usan la misma paleta. V-Rock y el verde añaden un lavado suave al
+  fondo.
 - **Modo de tema** claro/oscuro/automático vía `data-theme` en `<html>`; un
   script inline lo aplica antes del primer pintado para evitar parpadeos.
 
@@ -125,8 +128,8 @@ src/
   los assets: la app abre y funciona sin conexión.
 - **No hay peticiones de red con datos del usuario.** Ni registro, ni analytics,
   ni sincronización: si borras los datos del navegador o el almacenamiento del
-  sitio, desaparecen. Por eso la app insiste en exportar un respaldo `.txt`
-  firmado; ese archivo es la única forma de restaurar la información.
+  sitio, desaparecen. Por eso la app insiste en guardar una copia `.txt`; ese
+  archivo es la única forma de restaurar la información.
 
 ## Stack
 

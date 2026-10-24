@@ -92,7 +92,7 @@ export function GoalCompletedDialog({
               aria-hidden="true"
               className="absolute inset-0 animate-ping-slow rounded-full bg-success/25"
             />
-            <span className="relative grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-success to-primary text-white shadow-lg shadow-success/35">
+            <span className="relative grid h-16 w-16 place-items-center rounded-full bg-surface text-success shadow-lg shadow-success/35 ring-4 ring-white/25">
               <CheckIcon className="h-8 w-8" strokeWidth={2.4} />
             </span>
           </div>

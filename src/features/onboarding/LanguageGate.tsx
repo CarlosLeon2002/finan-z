@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAppState } from '../../app/state'
 import { cn } from '../../lib/cn'
+import { BrandMark } from '../../components/brand/BrandLogo'
 import { Button } from '../../components/ui/Button'
 import { GlobeIcon, ShieldIcon } from '../../components/ui/Icon'
 import type { Locale } from '../../types'
@@ -22,15 +23,13 @@ export function LanguageGate() {
     <div className="flex min-h-dvh items-center justify-center bg-bg px-4 py-10">
       <div className="w-full max-w-lg animate-fade-up">
         <div className="mb-8 text-center">
-          <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#7c3aed] text-xl font-bold text-white shadow-lg shadow-primary/40">
-            $
-          </span>
+          <BrandMark className="mx-auto h-16 w-16 drop-shadow-[0_10px_24px_rgba(15,122,85,0.28)]" />
           <h1 className="mt-4 text-2xl font-semibold tracking-tight text-text">
             <span className="text-gradient">Finan-Z</span>
           </h1>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted">
-            Organiza tus ingresos, repártelos, define metas de ahorro y recibe un consejo cada
-            día. Todo queda guardado únicamente en este dispositivo.
+            Organiza tu ingreso, reparte tus gastos y avanza hacia tus metas. Un consejo nuevo
+            cada día, y todo guardado solo en este dispositivo.
           </p>
         </div>
 
@@ -77,7 +76,7 @@ export function LanguageGate() {
 
         <p className="mt-5 flex items-center justify-center gap-2 text-center text-xs text-muted">
           <ShieldIcon className="h-4 w-4 shrink-0" />
-          Sin cuentas, sin nube, sin rastreo: tus datos nunca salen de tu dispositivo.
+          Sin cuentas, sin nube: tus datos se quedan aquí, contigo.
         </p>
       </div>
     </div>

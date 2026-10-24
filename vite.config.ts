@@ -16,14 +16,14 @@ export default defineConfig({
         name: 'Finan-Z',
         short_name: 'Finan-Z',
         description:
-          'Administra tus ingresos, metas de ahorro y consejos diarios. Tu información nunca sale de tu dispositivo.',
+          'Organiza tu ingreso, reparte tus gastos y avanza hacia tus metas. Tus datos se quedan en tu dispositivo.',
         lang: 'es-419',
         dir: 'ltr',
         start_url: '/',
         scope: '/',
         display: 'standalone',
-        background_color: '#f6f7fb',
-        theme_color: '#4f46e5',
+        background_color: '#f6f7f9',
+        theme_color: '#0f7a55',
         categories: ['finance', 'productivity'],
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },

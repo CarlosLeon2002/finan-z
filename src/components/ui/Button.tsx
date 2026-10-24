@@ -13,14 +13,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANT_CLASS: Record<Variant, string> = {
   primary:
-    'bg-primary text-white hover:bg-primary-strong active:scale-[0.98] shadow-[0_1px_2px_rgba(16,20,35,0.06),0_6px_16px_-6px_var(--color-primary)]',
+    'bg-primary text-on-primary hover:brightness-95 active:scale-[0.98] shadow-[0_1px_2px_rgba(16,20,35,0.06),0_6px_16px_-6px_var(--color-primary)]',
   secondary:
     'bg-surface text-text border border-border hover:border-primary/40 hover:text-primary-strong active:scale-[0.98]',
   ghost: 'text-muted hover:bg-surface-2 hover:text-text active:scale-[0.98]',
   danger:
-    'bg-danger text-white hover:opacity-90 active:scale-[0.98] shadow-[0_1px_2px_rgba(16,20,35,0.06),0_6px_16px_-6px_var(--color-danger)]',
+    'bg-danger text-on-danger hover:opacity-90 active:scale-[0.98] shadow-[0_1px_2px_rgba(16,20,35,0.06),0_6px_16px_-6px_var(--color-danger)]',
   success:
-    'bg-success text-white hover:opacity-90 active:scale-[0.98] shadow-[0_1px_2px_rgba(16,20,35,0.06),0_6px_16px_-6px_var(--color-success)]',
+    'bg-success text-on-success hover:opacity-90 active:scale-[0.98] shadow-[0_1px_2px_rgba(16,20,35,0.06),0_6px_16px_-6px_var(--color-success)]',
 }
 
 const SIZE_CLASS: Record<Size, string> = {

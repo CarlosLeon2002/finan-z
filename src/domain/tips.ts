@@ -140,8 +140,8 @@ export const TIPS: Tip[] = [
     id: 'compare-apr',
     theme: 'debt',
     text: {
-      es: 'Compara la tasa anual (TAE/APR), no la cuota mensual: ahí se esconde el costo real.',
-      en: 'Compare the annual rate (APR), not the monthly payment: that’s where the real cost hides.',
+      es: 'Mira cuánto pagas al año en intereses, no solo la cuota mensual: ahí está el costo real.',
+      en: 'Look at how much interest you pay over a year, not just the monthly payment: that’s the real cost.',
     },
     source: {
       es: 'Inspirado en «The Index Card», Helaine Olen y Harold Pollack',
@@ -176,8 +176,8 @@ export const TIPS: Tip[] = [
     id: 'compound-interest',
     theme: 'investing',
     text: {
-      es: 'El interés compuesto hace que el tiempo valga más que el monto inicial: empieza aunque sea poco.',
-      en: 'Compound interest makes time matter more than the starting amount: start even if it’s small.',
+      es: 'Deja que tus intereses generen más intereses: el tiempo importa más que el monto inicial. Empieza aunque sea poco.',
+      en: 'Let your interest earn more interest: time matters more than the starting amount. Start even if it’s small.',
     },
     source: {
       es: 'Inspirado en «The Simple Path to Wealth», JL Collins',
@@ -236,8 +236,8 @@ export const TIPS: Tip[] = [
     id: 'diversify',
     theme: 'investing',
     text: {
-      es: 'Diversifica: no pongas todo en un solo activo, un solo banco o una sola idea.',
-      en: 'Diversify: don’t put everything into one asset, one bank or one idea.',
+      es: 'No pongas todo en un mismo lugar: ni en una sola inversión, ni en un solo banco, ni en una sola idea.',
+      en: 'Don’t put everything in one place: not one investment, one bank or one idea.',
     },
     source: {
       es: 'Inspirado en «Un paseo aleatorio por Wall Street», Burton Malkiel',
@@ -312,8 +312,8 @@ export const TIPS: Tip[] = [
       en: 'Create funds for predictable expenses—insurance, gifts, maintenance—and stop breaking your budget every year.',
     },
     source: {
-      es: 'Inspirado en el método de fondos de amortiguación de YNAB',
-      en: 'Inspired by YNAB’s sinking-fund method',
+      es: 'Inspirado en las reservas para gastos futuros de YNAB',
+      en: 'Inspired by YNAB’s savings categories for future expenses',
     },
   },
   {
@@ -356,8 +356,8 @@ export const TIPS: Tip[] = [
     id: 'index-funds',
     theme: 'investing',
     text: {
-      es: 'Para la mayoría, un fondo indexado diversificado y de bajo costo supera a intentar adivinar el próximo éxito.',
-      en: 'For most people, a diversified low-cost index fund beats trying to guess the next big winner.',
+      es: 'Para la mayoría, una inversión amplia y de bajo costo supera a intentar adivinar el próximo gran éxito.',
+      en: 'For most people, a broad, low-cost investment beats trying to guess the next big winner.',
     },
     source: {
       es: 'Inspirado en «El pequeño libro para invertir con sentido común», John Bogle',
@@ -368,8 +368,8 @@ export const TIPS: Tip[] = [
     id: 'fees-matter',
     theme: 'investing',
     text: {
-      es: 'Una comisión de 2 % parece pequeña, pero se come una parte enorme de tus rendimientos en 30 años.',
-      en: 'A 2% fee looks small, but it eats a huge share of your returns over 30 years.',
+      es: 'Una comisión de 2 % parece pequeña, pero se lleva una parte enorme de lo que ganas en 30 años.',
+      en: 'A 2% fee looks small, but it takes a huge share of what you earn over 30 years.',
     },
     source: {
       es: 'Inspirado en «El pequeño libro para invertir con sentido común», John Bogle',

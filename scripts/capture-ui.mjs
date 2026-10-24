@@ -42,16 +42,18 @@ async function capture(name, { accent, themeMode, route = '#/home', width = 1280
   }, accent, themeMode)
 
   await page.goto(`${BASE}${route}`, { waitUntil: 'networkidle0' })
-  await sleep(700)
-  await page.screenshot({ path: `/tmp/opencode/${name}.png`, fullPage: true })
+  await sleep(1800)
+  await page.screenshot({ path: `/tmp/opencode/${name}.png`, fullPage: false })
   console.log(`captura: /tmp/opencode/${name}.png`)
   await page.close()
 }
 
-await capture('ui-indigo-light', { accent: 'indigo', themeMode: 'light' })
+await capture('ui-green-light', { accent: 'indigo', themeMode: 'light' })
+await capture('ui-green-dark', { accent: 'indigo', themeMode: 'dark' })
 await capture('ui-vrock-light', { accent: 'vrock', themeMode: 'light' })
 await capture('ui-vrock-dark', { accent: 'vrock', themeMode: 'dark', route: '#/partition' })
-await capture('ui-indigo-settings', { accent: 'indigo', themeMode: 'light', route: '#/settings' })
+await capture('ui-green-settings', { accent: 'indigo', themeMode: 'light', route: '#/settings' })
+await capture('ui-green-mobile', { accent: 'indigo', themeMode: 'light', width: 390, height: 1200 })
 await capture('ui-mobile-vrock', { accent: 'vrock', themeMode: 'light', width: 390, height: 1200 })
 
 await browser.close()

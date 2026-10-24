@@ -2,8 +2,8 @@
  * Genera los iconos de la PWA (PNG) sin dependencias: solo zlib de Node.
  * Uso: npm run icons
  *
- * Se dibuja un gráfico de barras con flecha de crecimiento sobre un degradado
- * de la marca. Se exportan cuatro tamaños:
+ * Se dibuja la Z de la marca sobre un degradado verde. Se exportan cuatro
+ * tamaños:
  *  - icon-192.png / icon-512.png  -> instalación normal (esquinas redondeadas)
  *  - icon-maskable-512.png        -> zona segura del 80 % (Android)
  *  - apple-touch-icon.png         -> iOS
@@ -146,8 +146,8 @@ function createCanvas(size) {
 
 /* ---------------------------------------------------------------- icono ---- */
 
-const TOP = '#6366f1'
-const BOTTOM = '#7c3aed'
+const TOP = '#21a97a'
+const BOTTOM = '#075a40'
 const GLYPH = '#ffffff'
 
 /**
@@ -159,27 +159,19 @@ function drawIcon(size, { roundCorners = true, inset = 1 } = {}) {
   const canvas = createCanvas(size)
   canvas.gradient(TOP, BOTTOM)
 
-  // Coordenadas normalizadas del glifo (0..1), escaladas hacia el centro.
+  // Coordenadas normalizadas de la Z, escaladas hacia el centro.
   const map = (value) => (value - 0.5) * inset * size + size / 2
   const unit = (value) => value * inset * size
+  const stroke = unit(0.085)
 
-  const baseline = map(0.74)
-  const barWidth = unit(0.115)
-  const centers = [0.325, 0.5, 0.675]
-  const heights = [0.16, 0.26, 0.37]
+  const topY = map(0.27)
+  const bottomY = map(0.73)
+  const leftX = map(0.2)
+  const rightX = map(0.8)
 
-  centers.forEach((center, index) => {
-    const height = unit(heights[index])
-    canvas.roundedRect(map(center) - barWidth / 2, baseline - height, barWidth, height, barWidth / 2, GLYPH)
-  })
-
-  // Flecha de crecimiento
-  const stroke = unit(0.05)
-  const tipX = map(0.78)
-  const tipY = map(0.3)
-  canvas.segment(map(0.27), map(0.55), tipX, tipY, stroke, GLYPH)
-  canvas.segment(tipX, tipY, tipX - unit(0.15), tipY, stroke, GLYPH)
-  canvas.segment(tipX, tipY, tipX, tipY + unit(0.15), stroke, GLYPH)
+  canvas.segment(leftX, topY, rightX, topY, stroke, GLYPH)
+  canvas.segment(rightX, topY, leftX, bottomY, stroke, GLYPH)
+  canvas.segment(leftX, bottomY, rightX, bottomY, stroke, GLYPH)
 
   if (roundCorners) canvas.clipRoundedCorners(size * 0.22)
 

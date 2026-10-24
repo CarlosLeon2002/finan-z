@@ -162,7 +162,7 @@ export async function downloadExport(state: AppState, i18n: I18nValue): Promise<
 
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = `finan-z-backup-${todayISO()}.txt`
+  anchor.download = `finan-z-${i18n.locale === 'es-419' ? 'copia' : 'copy'}-${todayISO()}.txt`
   document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()

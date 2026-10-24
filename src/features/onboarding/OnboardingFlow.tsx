@@ -4,6 +4,7 @@ import { useI18n } from '../../app/i18n'
 import { APP_VERSION } from '../../lib/appVersion'
 import { cn } from '../../lib/cn'
 import type { TFunction, TranslationKey } from '../../i18n/types'
+import { BrandLockup } from '../../components/brand/BrandLogo'
 import { Button } from '../../components/ui/Button'
 import {
   BookIcon,
@@ -50,20 +51,6 @@ const STEPS: Step[] = [
   },
 ]
 
-function Brand() {
-  return (
-    <span className="flex items-center gap-2.5">
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-sm font-bold text-white shadow-md shadow-primary/30">
-        $
-      </span>
-      <span className="leading-tight">
-        <span className="block text-sm font-semibold tracking-tight text-text">Finan-Z</span>
-        <span className="block text-[11px] text-muted">v{APP_VERSION}</span>
-      </span>
-    </span>
-  )
-}
-
 interface VisualProps {
   t: TFunction
   money: (value: number) => string
@@ -74,14 +61,14 @@ function WelcomeVisual({ t, money }: VisualProps) {
     <div className="relative mx-auto w-full max-w-sm">
       <div className="absolute -inset-4 rounded-[2rem] bg-primary/10 blur-2xl" />
       <div className="relative rounded-[1.75rem] border border-border bg-surface p-4 shadow-xl shadow-primary/10">
-        <div className="rounded-2xl bg-gradient-to-br from-primary to-primary-strong p-4 text-white">
-          <p className="text-xs font-medium text-white/75">{t('onboarding.mockAvailable')}</p>
+        <div className="rounded-2xl bg-gradient-to-br from-primary to-primary-strong p-4 text-on-primary">
+          <p className="text-xs font-medium text-on-primary/90">{t('onboarding.mockAvailable')}</p>
           <p className="figure mt-1 text-3xl font-semibold tracking-tight">{money(1240)}</p>
           <div className="mt-3 flex gap-1.5">
-            <span className="h-1.5 flex-1 rounded-full bg-white/90" />
-            <span className="h-1.5 flex-1 rounded-full bg-white/70" />
-            <span className="h-1.5 flex-1 rounded-full bg-white/40" />
-            <span className="h-1.5 flex-1 rounded-full bg-white/20" />
+            <span className="h-1.5 flex-1 rounded-full bg-on-primary/90" />
+            <span className="h-1.5 flex-1 rounded-full bg-on-primary/70" />
+            <span className="h-1.5 flex-1 rounded-full bg-on-primary/40" />
+            <span className="h-1.5 flex-1 rounded-full bg-on-primary/20" />
           </div>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2">
@@ -89,7 +76,7 @@ function WelcomeVisual({ t, money }: VisualProps) {
             {
               label: 'onboarding.mockHome',
               amount: 620,
-              tone: 'from-indigo-400/30 to-indigo-500/10',
+              tone: 'from-emerald-400/30 to-emerald-500/10',
             },
             {
               label: 'onboarding.mockFood',
@@ -314,12 +301,15 @@ export function OnboardingFlow() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
-      <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-        <Brand />
+      <header className="mx-auto grid w-full max-w-5xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-4 sm:px-6">
+        <span className="h-9" aria-hidden="true" />
+        <div className="col-start-2 justify-self-center">
+          <BrandLockup subtitle={`v${APP_VERSION}`} />
+        </div>
         <button
           type="button"
           onClick={finish}
-          className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-muted transition hover:border-primary/40 hover:text-text"
+          className="col-start-3 justify-self-end rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-muted transition hover:border-primary/40 hover:text-text"
         >
           {t('onboarding.skip')}
         </button>

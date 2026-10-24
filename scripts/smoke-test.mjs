@@ -32,7 +32,7 @@ const waitForDownload = async (previous) => {
     if (files.length > 0) return path.join(DOWNLOAD_DIR, files[0])
     await sleep(200)
   }
-  throw new Error('la descarga del respaldo no apareció')
+  throw new Error('la descarga de la copia no apareció')
 }
 
 fs.rmSync(DOWNLOAD_DIR, { recursive: true, force: true })
@@ -179,38 +179,38 @@ try {
   await page.keyboard.press('Escape').catch(() => {})
   await sleep(200)
 
-  // 7. Exportación firmada y validación de importación.
+  // 7. Copia descargable y restauración validada.
   await page.goto(`${BASE}#/settings`, { waitUntil: 'networkidle0' })
-  const hasExport = await page.evaluate(() => /export/i.test(document.body.innerText))
-  log('ajustes: exportación presente', hasExport)
+  const hasCopy = await page.evaluate(() => /copia|copy/i.test(document.body.innerText))
+  log('ajustes: copia presente', hasCopy)
 
   const before = new Set(fs.readdirSync(DOWNLOAD_DIR))
   log(
-    'ajustes: descargar respaldo .txt',
-    await clickButton(page, /Descargar respaldo|Download .txt backup/),
+    'ajustes: descargar copia .txt',
+    await clickButton(page, /Descargar copia|Download .txt copy/),
   )
   const downloaded = await waitForDownload(before)
   const backup = fs.readFileSync(downloaded, 'utf8')
-  log('respaldo: cabecera firmada', backup.includes('# FINAN-Z:BACKUP:1'))
-  log('respaldo: checksum SHA-256', /# CHECKSUM:sha256:[0-9a-f]{64}/.test(backup))
-  log('respaldo: reporte legible', backup.includes('Finan-Z'))
+  log('copia: cabecera firmada', backup.includes('# FINAN-Z:BACKUP:1'))
+  log('copia: checksum SHA-256', /# CHECKSUM:sha256:[0-9a-f]{64}/.test(backup))
+  log('copia: reporte legible', backup.includes('Finan-Z'))
 
   const fileInput = await page.$('input[type="file"]')
   log('ajustes: campo de importación presente', Boolean(fileInput))
   await fileInput.uploadFile(downloaded)
   await page.waitForFunction(
-    () => /Revisa el respaldo|Review the backup/i.test(document.body.innerText),
+    () => /Así quedará tu información|what your data will look like/i.test(document.body.innerText),
     { timeout: 5000 },
   )
   const previewText = await page.evaluate(() => document.body.innerText)
-  log('importación: vista previa válida', /Firma de integridad verificada|integrity signature verified/i.test(previewText))
+  log('importación: vista previa válida', /Copia completa y lista para restaurar|Complete and ready to restore/i.test(previewText))
   log('importación: muestra contenido', /2 meses|2 months/i.test(previewText))
   log(
-    'importación: restaurar respaldo',
-    await clickButton(page, /Restaurar respaldo|Restore backup/),
+    'importación: restaurar copia',
+    await clickButton(page, /Restaurar esta copia|Restore this copy/),
   )
   await page.waitForFunction(
-    () => /Respaldo restaurado|Backup restored/i.test(document.body.innerText),
+    () => /Listo\. Restauramos|All set\. We restored/i.test(document.body.innerText),
     { timeout: 5000 },
   )
   const restored = await page.evaluate(() => {
@@ -235,11 +235,11 @@ try {
   const tamperedInput = await page.$('input[type="file"]')
   await tamperedInput.uploadFile(tampered)
   await page.waitForFunction(
-    () => /No se pudo importar|Could not import/i.test(document.body.innerText),
+    () => /No pudimos restaurar|couldn’t restore/i.test(document.body.innerText),
     { timeout: 5000 },
   )
   const errorText = await page.evaluate(() => document.body.innerText)
-  log('importación: rechaza archivo alterado', /firma|checksum|íntegr|integrity/i.test(errorText))
+  log('importación: rechaza archivo alterado', /incompleta|cambió después|incomplete|changed after download/i.test(errorText))
   await clickButton(page, /^Cerrar$|^Close$/)
 
   // 8. Regresión: los títulos de alerta deben interpolar el nombre de la meta.

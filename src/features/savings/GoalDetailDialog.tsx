@@ -283,7 +283,7 @@ export function GoalDetailDialog({ open, goal, onClose, onRemove }: GoalDetailDi
         {/* Números clave */}
         {isComplete ? (
           <div className="flex items-center gap-3 rounded-2xl border border-success/30 bg-success-soft p-4">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-success text-white shadow-md shadow-success/25">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-success text-on-success shadow-md shadow-success/25">
               <CheckIcon className="h-5 w-5" strokeWidth={2.5} />
             </span>
             <div className="min-w-0">

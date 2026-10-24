@@ -174,8 +174,8 @@ function AccentPicker({
             )}
           >
             <span
-              className="grid h-7 w-7 place-items-center rounded-full text-white"
-              style={{ backgroundColor: option.swatch }}
+              className="grid h-7 w-7 place-items-center rounded-full"
+              style={{ backgroundColor: option.swatch, color: option.onSwatch }}
             >
               {isActive ? <CheckIcon className="h-4 w-4" /> : null}
             </span>

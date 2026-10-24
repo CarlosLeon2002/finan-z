@@ -38,6 +38,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     const colors = accentColors(accent, isDark)
     root.style.setProperty('--color-primary', colors.primary)
+    root.style.setProperty('--color-on-primary', colors.onPrimary)
     root.style.setProperty('--color-primary-strong', colors.strong)
     root.style.setProperty('--color-primary-soft', colors.soft)
     root.style.setProperty('--color-on-primary-soft', colors.onSoft)

@@ -2,12 +2,12 @@ import confetti from 'canvas-confetti'
 
 /** Lee los colores del tema activo (acento + semánticos) desde los tokens CSS. */
 function themeColors(): string[] {
-  if (typeof window === 'undefined') return ['#4a51c8', '#0e9167']
+  if (typeof window === 'undefined') return ['#0f7a55', '#0e9167']
   const styles = getComputedStyle(document.documentElement)
   const read = (token: string, fallback: string) => styles.getPropertyValue(token).trim() || fallback
   return [
-    read('--color-primary', '#4a51c8'),
-    read('--color-primary-strong', '#3f45ac'),
+    read('--color-primary', '#0f7a55'),
+    read('--color-primary-strong', '#0d6647'),
     read('--color-success', '#0e9167'),
     read('--color-warning', '#c98209'),
     '#ffffff',

@@ -1,22 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="geometricPrecision">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6366f1" />
-      <stop offset="1" stop-color="#7c3aed" />
+    <linearGradient id="bg" x1="10" y1="5" x2="54" y2="59" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#21A97A" />
+      <stop offset="0.52" stop-color="#0F7A55" />
+      <stop offset="1" stop-color="#075A40" />
+    </linearGradient>
+    <linearGradient id="shine" x1="12" y1="6" x2="34" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.28" />
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#g)" />
-  <g fill="#fff">
-    <rect x="16" y="40" width="7" height="12" rx="3.5" />
-    <rect x="28.5" y="34" width="7" height="18" rx="3.5" />
-    <rect x="41" y="27" width="7" height="25" rx="3.5" />
-  </g>
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#bg)" />
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#shine)" />
   <path
-    d="M17 30 L40 17"
-    stroke="#fff"
-    stroke-width="4"
-    stroke-linecap="round"
+    d="M20 22h24L20 42h24"
     fill="none"
+    stroke="#FFFFFF"
+    stroke-width="6.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
   />
-  <path d="M40 17 h-9 M40 17 v9" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none" />
 </svg>

@@ -54,20 +54,23 @@
   --color-text: #171a2b;
   --color-muted: #5f657d;
 
-  /* Acento por defecto (indigo sobrio). */
-  --color-primary: #4a51c8;
-  --color-primary-strong: #3f45ac;
-  --color-primary-soft: #ecedfb;
-  --color-on-primary-soft: #3a3f9e;
+  /* Acento por defecto: verde financiero, sereno y con buen contraste. */
+  --color-primary: #0f7a55;
+  --color-on-primary: #ffffff;
+  --color-primary-strong: #0d6647;
+  --color-primary-soft: #e5f0ec;
+  --color-on-primary-soft: #0a533a;
 
   /* Semánticos (claro): éxito (ahorro), aviso (presupuesto), peligro (deuda). */
   --color-success: #0e9167;
+  --color-on-success: #07130e;
   --color-success-soft: #d6f5e8;
   --color-on-success-soft: #067a54;
   --color-warning: #c98209;
   --color-warning-soft: #fbeed3;
   --color-on-warning-soft: #9c6308;
-  --color-danger: #dc3d59;
+  --color-danger: #c4314b;
+  --color-on-danger: #ffffff;
   --color-danger-soft: #ffe1e7;
   --color-on-danger-soft: #be2440;
 }
@@ -81,20 +84,38 @@ html[data-theme='dark'] {
   --color-text: #e8ecf6;
   --color-muted: #98a2c0;
 
-  --color-primary: #8b90f2;
-  --color-primary-strong: #a7abf7;
-  --color-primary-soft: #1d2340;
-  --color-on-primary-soft: #c3c7fb;
+  --color-primary: #54d6a0;
+  --color-on-primary: #08130e;
+  --color-primary-strong: #6cdcad;
+  --color-primary-soft: #1a3a37;
+  --color-on-primary-soft: #8be3be;
 
   --color-success: #2fbf8e;
+  --color-on-success: #07130e;
   --color-success-soft: #0c3a2d;
   --color-on-success-soft: #5fe0ad;
   --color-warning: #eab23c;
   --color-warning-soft: #3a2c07;
   --color-on-warning-soft: #f6cf6a;
   --color-danger: #f2536d;
+  --color-on-danger: #08130e;
   --color-danger-soft: #43121f;
   --color-on-danger-soft: #fb8ba0;
+}
+
+/* Verde Finan-Z: un lavado muy suave que da profundidad sin distraer. */
+html[data-accent='indigo'] body {
+  background-image:
+    radial-gradient(60rem 40rem at 106% -10%, color-mix(in oklab, #7dd3ae 15%, transparent), transparent 62%),
+    radial-gradient(52rem 36rem at -10% 108%, color-mix(in oklab, #a7f3d0 12%, transparent), transparent 60%);
+  background-attachment: fixed;
+}
+
+html[data-theme='dark'][data-accent='indigo'] body {
+  background-image:
+    radial-gradient(60rem 40rem at 106% -10%, color-mix(in oklab, #0f7a55 28%, transparent), transparent 64%),
+    radial-gradient(52rem 36rem at -10% 108%, color-mix(in oklab, #075a40 24%, transparent), transparent 62%);
+  background-attachment: fixed;
 }
 
 /* V-Rock: lavado rosa pastel, romántico pero discreto, detrás de la interfaz. */
@@ -141,7 +162,7 @@ html[data-theme='dark'][data-accent='vrock'] body {
 
   ::selection {
     background-color: var(--color-primary);
-    color: #fff;
+    color: var(--color-on-primary);
   }
 
   /* Foco visible y consistente en toda la app (accesibilidad). */
@@ -164,7 +185,7 @@ html[data-theme='dark'][data-accent='vrock'] body {
     background-image: linear-gradient(
       120deg,
       var(--color-primary),
-      color-mix(in oklab, var(--color-primary) 60%, #d946a6)
+      var(--color-primary-strong)
     );
     background-clip: text;
     -webkit-background-clip: text;
